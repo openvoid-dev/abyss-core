@@ -18,9 +18,9 @@ class Application
         require static::$base_path . '/app/routes/web.php';
 
         try {
-            $horizon->route();
+            Horizon::route();
         } catch (err) {
-            return $horizon->redirect($horizon->previousUrl());
+            return Horizon::redirect(Horizon::previousUrl());
         }
     }
 }
