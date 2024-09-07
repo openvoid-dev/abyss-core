@@ -1,4 +1,7 @@
 <?php
+/**
+ * Simple controller based router
+ */
 
 namespace Abyss\Horizon;
 
@@ -61,7 +64,7 @@ class Horizon
             if ($route['uri'] === $uri && $route['method'] === strtoupper($method)) {
                 Middleware::resolve($route['middleware']);
 
-                return require $this->base_path("asdf/" . $route['controller']);
+                return require $this->base_path("controllers/" . $route['controller']);
             }
         }
 
@@ -90,7 +93,7 @@ class Horizon
 
     protected function base_path(string $path) : string
     {
-        return BASE_PATH . $path;
+        return dirname(__DIR__) . '/../app/' . $path;
     }
 
     protected function get_uri() : mixed

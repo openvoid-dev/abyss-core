@@ -1,4 +1,7 @@
 <?php
+/**
+ * Simple AUTH system
+ */
 
 namespace Abyss\Nebula;
 
