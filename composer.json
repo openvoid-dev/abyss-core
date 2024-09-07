@@ -1,0 +1,19 @@
+{
+    "name": "abyss/framework",
+    "description": "Abyss framework",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Abyss\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Antonio Obradović",
+            "email": "antonio@obradovic.dev"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {}
+}
