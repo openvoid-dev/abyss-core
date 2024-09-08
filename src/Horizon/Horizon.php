@@ -14,10 +14,11 @@ class Horizon
     public static function add($method, $uri, $controller)
     {
         self::$routes[] = [
-            "uri"        => $uri,
-            "controller" => $controller,
-            "method"     => $method,
-            "middleware" => null,
+            "uri"               => $uri,
+            "controller"        => $controller[0],
+            "controller_method" => $controller[1],
+            "method"            => $method,
+            "middleware"        => null,
         ];
     }
 
@@ -60,7 +61,7 @@ class Horizon
             if ($route['uri'] === $uri && $route['method'] === strtoupper($method)) {
                 Middleware::resolve($route['middleware']);
 
-                return require static::base_path("controllers/" . $route['controller']);
+                return call_user_func_array([$route["controller"], $route["controller_method"]], []);
             }
         }
 
@@ -69,7 +70,6 @@ class Horizon
 
     public static function previousUrl() : string
     {
-        var_dump("aa");
         return $_SERVER['HTTP_REFERER'];
     }
 

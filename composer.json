@@ -5,7 +5,8 @@
     "license": "MIT",
     "autoload": {
         "psr-4": {
-            "Abyss\\": "src/"
+            "Abyss\\": "src/",
+            "App\\": "app/"
         }
     },
     "authors": [
