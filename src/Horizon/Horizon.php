@@ -1,6 +1,6 @@
 <?php
 /**
- * Simple controller based router
+ * Simple controller-based router with dynamic route parameters
  */
 
 namespace Abyss\Horizon;
@@ -13,6 +13,9 @@ class Horizon
 
     public static function add($method, $uri, $controller)
     {
+        // * Convert dynamic route placeholders {test_slug} to regex for matching
+        $uri = preg_replace('/\{([a-zA-Z_][a-zA-Z0-9_-]*)\}/', '(?P<\1>[^/]+)', $uri);
+
         self::$routes[] = [
             "uri"               => $uri,
             "controller"        => $controller[0],
@@ -49,7 +52,7 @@ class Horizon
 
     public static function only($key)
     {
-        self::$routes[array_key_last(static::routes)]['middleware'] = $key;
+        self::$routes[array_key_last(static::$routes)]['middleware'] = $key;
     }
 
     public static function route() : mixed
@@ -58,11 +61,18 @@ class Horizon
         $method = static::get_method();
 
         foreach (self::$routes as $route) {
-            if ($route['uri'] === $uri && $route['method'] === strtoupper($method)) {
-                Middleware::resolve($route['middleware']);
+            // * Use regex to match dynamic URI patterns like /tests/{test_slug}
+            $pattern = "@^" . $route['uri'] . "$@";
 
-                return call_user_func_array([$route["controller"], $route["controller_method"]], []);
+            if (! preg_match($pattern, $uri, $matches) || $route['method'] !== strtoupper($method)) {
+                continue;
             }
+
+            Middleware::resolve($route['middleware']);
+
+            $params = array_filter($matches, 'is_string', ARRAY_FILTER_USE_KEY);
+
+            return call_user_func_array([$route["controller"], $route["controller_method"]], $params);
         }
 
         static::abort();
