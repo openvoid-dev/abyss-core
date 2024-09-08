@@ -13,6 +13,6 @@ abstract class Controller
     {
         // extract($props);
 
-        require Application::get_base_path("/app/pages/" . $page . '.php');
+        require Application::get_base_path("/app/views/" . $page . '.php');
     }
 }

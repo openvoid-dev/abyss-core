@@ -15,7 +15,7 @@ class Application
 
     public static function handle_request()
     {
-        require static::$base_path . '/app/routes/web.php';
+        require static::$base_path . '/server/routes/web.php';
 
         try {
             Horizon::route();
