@@ -1,13 +1,18 @@
 <?php
 /**
  * Abstract class for every controller
- *
- * ! Currently empty, for later to be added
  */
 
 namespace Abyss\Controller;
 
+use Abyss\Core\Application;
+
 abstract class Controller
 {
+    public static function view(string $page, array $props = [])
+    {
+        // extract($props);
 
+        require Application::get_base_path("/app/pages/" . $page . '.php');
+    }
 }

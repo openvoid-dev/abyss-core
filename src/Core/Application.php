@@ -23,4 +23,9 @@ class Application
             return Horizon::redirect(Horizon::previousUrl());
         }
     }
+
+    public static function get_base_path(string $path)
+    {
+        return self::$base_path . $path;
+    }
 }
