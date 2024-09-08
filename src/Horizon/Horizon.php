@@ -15,6 +15,8 @@ class Horizon
     {
         // * Convert dynamic route placeholders {test_slug} to regex for matching
         $uri = preg_replace('/\{([a-zA-Z_][a-zA-Z0-9_-]*)\}/', '(?P<\1>[^/]+)', $uri);
+        // * Allow for optional trailing slash by the end of the url
+        $uri = rtrim($uri, '/') . '/?';
 
         self::$routes[] = [
             "uri"               => $uri,
