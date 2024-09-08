@@ -3,6 +3,7 @@
 namespace Abyss\Core;
 
 use Abyss\Horizon\Horizon;
+use Dotenv\Dotenv;
 
 class Application
 {
@@ -11,6 +12,15 @@ class Application
     public static function configure(string $base_path)
     {
         static::$base_path = $base_path;
+
+        static::load_env();
+    }
+
+    public static function load_env()
+    {
+        $dotenv = Dotenv::createImmutable(self::$base_path);
+
+        $dotenv->load();
     }
 
     public static function handle_request()

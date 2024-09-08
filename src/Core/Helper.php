@@ -106,5 +106,16 @@ class Helper
     {
         return Session::get('old')[$key] ?? $default;
     }
+
+    public static function env(string $key, mixed $default_value = "")
+    {
+        if (isset($_ENV[$key])) {
+            return $_ENV[$key];
+        }
+
+        $value = getenv($key);
+
+        return $value !== false ? $value : $default_value;
+    }
 }
 
