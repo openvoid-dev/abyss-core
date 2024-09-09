@@ -16,7 +16,7 @@ class QueryBuilder
     public function __construct($table)
     {
         $this->table      = $table;
-        $this->connection = Outsider::getConnection();  // Use the database connection from Outsider
+        $this->connection = Outsider::get_connection();  // Use the database connection from Outsider
     }
 
     public function where($column, $operator, $value)
@@ -79,11 +79,11 @@ class QueryBuilder
         return $this->connection->lastInsertId();
     }
 
-    public function update(array $data, $primaryKey, $id)
+    public function update(array $data, $primary_key, $id)
     {
         $setClause = implode(' = ?, ', array_keys($data)) . ' = ?';
 
-        $sql       = "UPDATE {$this->table} SET $setClause WHERE $primaryKey = ?";
+        $sql       = "UPDATE {$this->table} SET $setClause WHERE $primary_key = ?";
         $statement = $this->connection->prepare($sql);
 
         $bindings   = array_values($data);
@@ -92,9 +92,9 @@ class QueryBuilder
         return $statement->execute($bindings);
     }
 
-    public function delete($primaryKey, $id)
+    public function delete($primary_key, $id)
     {
-        $sql       = "DELETE FROM {$this->table} WHERE $primaryKey = ?";
+        $sql       = "DELETE FROM {$this->table} WHERE $primary_key = ?";
         $statement = $this->connection->prepare($sql);
         return $statement->execute([$id]);
     }

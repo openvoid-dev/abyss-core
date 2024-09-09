@@ -34,7 +34,7 @@ class Outsider
         }
     }
 
-    public static function getConnection()
+    public static function get_connection()
     {
         if (! self::$connection) {
             die("No database connection established.");
