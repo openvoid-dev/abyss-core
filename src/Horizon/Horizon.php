@@ -1,20 +1,34 @@
 <?php
+
 /**
  * Simple controller-based router with dynamic route parameters
  */
 
 namespace Abyss\Horizon;
 
+use Abyss\Core\Application;
 use Abyss\Horizon\Middleware\Middleware;
 
 class Horizon
 {
     protected static $routes = [];
 
+    public static function start()
+    {
+        require Application::get_base_path('/server/routes/web.php');
+
+        try {
+            static::route();
+        } catch (err) {
+            return static::redirect(static::previousUrl());
+        }
+    }
+
     public static function add($method, $uri, $controller)
     {
         // * Convert dynamic route placeholders {test_slug} to regex for matching
         $uri = preg_replace('/\{([a-zA-Z_][a-zA-Z0-9_-]*)\}/', '(?P<\1>[^/]+)', $uri);
+
         // * Allow for optional trailing slash by the end of the url
         $uri = rtrim($uri, '/') . '/?';
 

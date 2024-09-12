@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * Core database config
+ */
+
 use Abyss\Core\Helper;
 
 return [

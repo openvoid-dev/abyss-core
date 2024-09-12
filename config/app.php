@@ -1,14 +1,28 @@
 <?php
-// * Start the application
-use Abyss\Core\Application;
-use Abyss\Outsider\Outsider;
 
-// * Configure app
-Application::configure(dirname(__DIR__));
+/**
+ * Core application config
+ */
 
-// * Connect to the database
-$config = require_once __DIR__ . '/../config/database.php';
-Outsider::connect($config);
+use Abyss\Core\Helper;
 
-// * Start the router
-Application::handle_request();
+return [
+    /**
+     * Application name
+     */
+
+
+    'name'     => Helper::env('APP_NAME', 'Abyss'),
+
+    /**
+     * Application environment
+     */
+
+    'env'      => Helper::env("APP_ENV", "development"),
+
+    /**
+     * Application timezone
+     */
+
+    'timezone' => Helper::env("APP_TIMEZONE", "Europe/Zagreb"),
+];
