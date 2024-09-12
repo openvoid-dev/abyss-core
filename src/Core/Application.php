@@ -4,36 +4,85 @@ namespace Abyss\Core;
 
 use Dotenv\Dotenv;
 
+/**
+ * Core Application class for configuring the application
+ */
 class Application
 {
-    public static $base_path;
-    public static $name;
-    public static $env;
-    public static $timezone;
+    /**
+     * The base path of the Abyss framework.
+     *
+     * @var string
+     */
+    protected static $base_path;
 
+    /**
+     * The name of the project.
+     *
+     * @var string
+     */
+    protected static $name;
+
+    /**
+     * Type of the application environment.
+     *
+     * @var string
+     */
+    protected static $env;
+
+    /**
+     * Timezone of the application.
+     *
+     * @var string
+     */
+    protected static $timezone;
+
+    /**
+     * Start the Abyss framework and load the env configuration
+     *
+     * @param string $base_path
+     * @return void
+     */
     public static function start(string $base_path) : void
     {
-        static::$base_path = $base_path;
+        self::$base_path = $base_path;
 
-        static::load_env();
+        self::load_env();
     }
 
-    public static function configure(array $config)
+    /**
+     * Import and configure the app configuration
+     *
+     * @param array $config
+     * @return void
+     */
+    public static function configure(array $config) : void
     {
-        static::$name     = $config["name"];
-        static::$env      = $config["env"];
-        static::$timezone = $config["timezone"];
+        self::$name     = $config["name"];
+        self::$env      = $config["env"];
+        self::$timezone = $config["timezone"];
     }
 
-    public static function load_env()
+    /**
+     * Get absolute path
+     *
+     * @param string $path
+     * @return string
+     */
+    public static function get_base_path(string $path) : string
+    {
+        return self::$base_path . $path;
+    }
+
+    /**
+     * Load env file and its content
+     *
+     * @return void
+     */
+    private static function load_env() : void
     {
         $dotenv = Dotenv::createImmutable(self::$base_path);
 
         $dotenv->load();
-    }
-
-    public static function get_base_path(string $path)
-    {
-        return self::$base_path . $path;
     }
 }

@@ -98,7 +98,14 @@ class Helper
         return Session::get('old')[$key] ?? $default;
     }
 
-    public static function env(string $key, mixed $default_value = "")
+    /**
+     * Get env value or set default one.
+     *
+     * @param string $key
+     * @param mixed $default_value
+     * @return mixed
+     */
+    public static function env(string $key, mixed $default_value = "") : mixed
     {
         if (isset($_ENV[$key])) {
             return $_ENV[$key];

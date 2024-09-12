@@ -7,8 +7,19 @@ use PDOException;
 
 class Outsider
 {
+    /**
+     * Connection to the db
+     *
+     * @var null|PDO
+     */
     protected static $connection = null;
 
+    /**
+     * Connect to the database with the provided config
+     *
+     * @param array $config
+     * @return void
+     */
     public static function connect(array $config)
     {
         $connection_config = $config['connections'][$config['default']];
@@ -34,6 +45,11 @@ class Outsider
         }
     }
 
+    /**
+     * Get database connection
+     *
+     * @return PDO|null
+     */
     public static function get_connection()
     {
         if (! self::$connection) {

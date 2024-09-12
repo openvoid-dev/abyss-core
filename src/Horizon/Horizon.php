@@ -1,29 +1,46 @@
 <?php
 
-/**
- * Simple controller-based router with dynamic route parameters
- */
-
 namespace Abyss\Horizon;
 
 use Abyss\Core\Application;
 use Abyss\Horizon\Middleware\Middleware;
 
+/**
+ * Simple controller-based router with dynamic route parameters
+ */
 class Horizon
 {
+    /**
+     * All of the defined routes
+     *
+     * @var array
+     */
     protected static $routes = [];
 
+    /**
+     * Start the router and listen for requests
+     *
+     * @return void|Horizon
+     */
     public static function start()
     {
         require Application::get_base_path('/server/routes/web.php');
 
         try {
-            static::route();
+            self::route();
         } catch (err) {
-            return static::redirect(static::previousUrl());
+            return self::redirect(self::previousUrl());
         }
     }
 
+    /**
+     * Add a route to the routes array
+     *
+     * @param mixed $method
+     * @param mixed $uri
+     * @param mixed $controller
+     * @return void
+     */
     public static function add($method, $uri, $controller)
     {
         // * Convert dynamic route placeholders {test_slug} to regex for matching
@@ -41,40 +58,86 @@ class Horizon
         ];
     }
 
+    /**
+     * Method for setting routes for GET requests
+     *
+     * @param string $uri
+     * @param mixed $controller
+     * @return void
+     */
     public static function get(string $uri, $controller)
     {
-        return static::add('GET', $uri, $controller);
+        return self::add('GET', $uri, $controller);
     }
 
+    /**
+     * Method for setting routes for POST requests
+     *
+     * @param mixed $uri
+     * @param mixed $controller
+     * @return void
+     */
     public static function post($uri, $controller)
     {
-        return static::add('POST', $uri, $controller);
+        return self::add('POST', $uri, $controller);
     }
 
+    /**
+     * Method for setting routes for DELETE requests
+     *
+     * @param mixed $uri
+     * @param mixed $controller
+     * @return void
+     */
     public static function delete($uri, $controller)
     {
-        return static::add('DELETE', $uri, $controller);
+        return self::add('DELETE', $uri, $controller);
     }
 
+    /**
+     * Method for setting routes for PATCH requests
+     *
+     * @param mixed $uri
+     * @param mixed $controller
+     * @return void
+     */
     public static function patch($uri, $controller)
     {
-        return static::add('PATCH', $uri, $controller);
+        return self::add('PATCH', $uri, $controller);
     }
 
+    /**
+     * Method for setting routes for PUT requests
+     *
+     * @param mixed $uri
+     * @param mixed $controller
+     * @return void
+     */
     public static function put($uri, $controller)
     {
-        return static::add('PUT', $uri, $controller);
+        return self::add('PUT', $uri, $controller);
     }
 
+    /**
+     * Method for defining middleware to a route
+     *
+     * @param mixed $key
+     * @return void
+     */
     public static function only($key)
     {
-        self::$routes[array_key_last(static::$routes)]['middleware'] = $key;
+        self::$routes[array_key_last(self::$routes)]['middleware'] = $key;
     }
 
+    /**
+     * Handle the current request
+     *
+     * @return mixed
+     */
     public static function route() : mixed
     {
-        $uri    = static::get_uri();
-        $method = static::get_method();
+        $uri    = self::get_uri();
+        $method = self::get_method();
 
         foreach (self::$routes as $route) {
             // * Use regex to match dynamic URI patterns like /tests/{test_slug}
@@ -91,20 +154,37 @@ class Horizon
             return call_user_func_array([$route["controller"], $route["controller_method"]], $params);
         }
 
-        static::abort();
+        self::abort();
     }
 
+    /**
+     * Get previous URL
+     *
+     * @return string
+     */
     public static function previousUrl() : string
     {
         return $_SERVER['HTTP_REFERER'];
     }
 
+    /**
+     * Redirect to the defined page
+     *
+     * @param string $path
+     * @return never
+     */
     public static function redirect(string $path) : never
     {
         header("location: {$path}");
         exit();
     }
 
+    /**
+     * Abort and render a page corresponding to the error code
+     *
+     * @param int $code
+     * @return never
+     */
     protected static function abort(int $code = 404) : never
     {
         http_response_code($code);
@@ -114,11 +194,21 @@ class Horizon
         die();
     }
 
+    /**
+     * Get current URI
+     *
+     * @return mixed
+     */
     protected static function get_uri() : mixed
     {
         return parse_url($_SERVER['REQUEST_URI'])['path'];
     }
 
+    /**
+     * Get request method
+     *
+     * @return mixed
+     */
     protected static function get_method() : mixed
     {
         return $_POST['_method'] ?? $_SERVER['REQUEST_METHOD'];

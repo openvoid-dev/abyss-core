@@ -1,15 +1,22 @@
 <?php
-/**
- * Abstract class for every controller
- */
 
 namespace Abyss\Controller;
 
 use Abyss\Core\Application;
 
+/**
+ * Abstract class for every controller
+ */
 abstract class Controller
 {
-    public static function view(string $page, array $props = [])
+    /**
+     * Render a page with props
+     *
+     * @param string $page
+     * @param array $props
+     * @return void
+     */
+    public static function view(string $page, array $props = []) : void
     {
         // extract($props);
 
