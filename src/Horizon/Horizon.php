@@ -109,14 +109,9 @@ class Horizon
     {
         http_response_code($code);
 
-        require static::base_path("views/{$code}.php");
+        require Application::get_base_path("/app/views/{$code}.php");
 
         die();
-    }
-
-    protected static function base_path(string $path) : string
-    {
-        return dirname(__DIR__) . '/../app/' . $path;
     }
 
     protected static function get_uri() : mixed

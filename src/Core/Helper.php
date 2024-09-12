@@ -2,6 +2,7 @@
 
 namespace Abyss\Core;
 
+use Abyss\Core\Application;
 use Abyss\Horizon\Session;
 
 /**
@@ -42,7 +43,7 @@ class Helper
     {
         http_response_code($code);
 
-        require static::base_path("views/{$code}.php");
+        require Application::get_base_path("/views/{$code}.php");
 
         die();
     }
@@ -63,16 +64,6 @@ class Helper
     }
 
     /**
-     * Summary of base_path
-     * @param string $path
-     * @return string
-     */
-    public static function base_path(string $path) : string
-    {
-        return BASE_PATH . $path;
-    }
-
-    /**
      * Summary of view
      * @param string $path
      * @param array $attributes
@@ -82,7 +73,7 @@ class Helper
     {
         extract($attributes);
 
-        require static::base_path('views/' . $path);
+        require Application::get_base_path("/views/" . $path);
     }
 
     /**
@@ -118,4 +109,3 @@ class Helper
         return $value !== false ? $value : $default_value;
     }
 }
-
