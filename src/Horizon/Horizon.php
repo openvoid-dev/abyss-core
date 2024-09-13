@@ -5,6 +5,8 @@ namespace Abyss\Horizon;
 use Abyss\Core\Application;
 use Abyss\Horizon\Middleware\Middleware;
 
+use Closure;
+
 /**
  * Simple controller-based router with dynamic route parameters
  */
@@ -38,10 +40,10 @@ class Horizon
      *
      * @param mixed $method
      * @param mixed $uri
-     * @param mixed $controller
+     * @param Closure|array $action
      * @return void
      */
-    public static function add($method, $uri, $controller)
+    public static function add($method, $uri, $action)
     {
         // * Convert dynamic route placeholders {test_slug} to regex for matching
         $uri = preg_replace('/\{([a-zA-Z_][a-zA-Z0-9_-]*)\}/', '(?P<\1>[^/]+)', $uri);
@@ -50,11 +52,10 @@ class Horizon
         $uri = rtrim($uri, '/') . '/?';
 
         self::$routes[] = [
-            "uri"               => $uri,
-            "controller"        => $controller[0],
-            "controller_method" => $controller[1],
-            "method"            => $method,
-            "middleware"        => null,
+            "uri"        => $uri,
+            "method"     => $method,
+            "middleware" => null,
+            "action"     => $action,
         ];
     }
 
@@ -62,60 +63,60 @@ class Horizon
      * Method for setting routes for GET requests
      *
      * @param string $uri
-     * @param mixed $controller
+     * @param Closure|array $action
      * @return void
      */
-    public static function get(string $uri, $controller)
+    public static function get(string $uri, $action)
     {
-        return self::add('GET', $uri, $controller);
+        return self::add('GET', $uri, $action);
     }
 
     /**
      * Method for setting routes for POST requests
      *
      * @param mixed $uri
-     * @param mixed $controller
+     * @param Closure|array $action
      * @return void
      */
-    public static function post($uri, $controller)
+    public static function post($uri, $action)
     {
-        return self::add('POST', $uri, $controller);
+        return self::add('POST', $uri, $action);
     }
 
     /**
      * Method for setting routes for DELETE requests
      *
      * @param mixed $uri
-     * @param mixed $controller
+     * @param Closure|array $action
      * @return void
      */
-    public static function delete($uri, $controller)
+    public static function delete($uri, $action)
     {
-        return self::add('DELETE', $uri, $controller);
+        return self::add('DELETE', $uri, $action);
     }
 
     /**
      * Method for setting routes for PATCH requests
      *
      * @param mixed $uri
-     * @param mixed $controller
+     * @param Closure|array $action
      * @return void
      */
-    public static function patch($uri, $controller)
+    public static function patch($uri, $action)
     {
-        return self::add('PATCH', $uri, $controller);
+        return self::add('PATCH', $uri, $action);
     }
 
     /**
      * Method for setting routes for PUT requests
      *
      * @param mixed $uri
-     * @param mixed $controller
+     * @param Closure|array $action
      * @return void
      */
-    public static function put($uri, $controller)
+    public static function put($uri, $action)
     {
-        return self::add('PUT', $uri, $controller);
+        return self::add('PUT', $uri, $action);
     }
 
     /**
@@ -134,7 +135,7 @@ class Horizon
      *
      * @return mixed
      */
-    public static function route() : mixed
+    public static function route()
     {
         $uri    = self::get_uri();
         $method = self::get_method();
@@ -151,7 +152,16 @@ class Horizon
 
             $params = array_filter($matches, 'is_string', ARRAY_FILTER_USE_KEY);
 
-            return call_user_func_array([$route["controller"], $route["controller_method"]], $params);
+            // * If actions is not a closure, it means it's an array
+            // * consisting of controller and method
+            if (! $route["action"] instanceof Closure) {
+                return call_user_func_array($route["action"], $params);
+            }
+
+            // * Call closure and pass $params from the url
+            echo $route["action"]($params);
+
+            return;
         }
 
         self::abort();
