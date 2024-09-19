@@ -26,7 +26,7 @@ class Horizon
      */
     public static function start()
     {
-        require Application::get_base_path('/server/routes/web.php');
+        require Application::get_base_path('/app/routes/web.php');
 
         try {
             self::route();
