@@ -2,6 +2,7 @@
 
 namespace Abyss\Outsider;
 
+use Abyss\Core\Helper;
 use Closure;
 
 class Schema
@@ -25,9 +26,8 @@ class Schema
         // * Create query
         $sql = "CREATE TABLE $table ($columns)";
 
-        var_dump($sql);
+        Helper::dd($sql);
     }
-
 
     /**
      * Delete a table
