@@ -40,6 +40,20 @@ class Column
     protected $nullable = false;
 
     /**
+     * Default value for a column
+     *
+     * @var null|string
+     */
+    protected $default = null;
+
+    /**
+     * Is column unique
+     *
+     * @var bool
+     */
+    protected $unique = false;
+
+    /**
      * Construct new column
      *
      * @param string $name
@@ -68,6 +82,31 @@ class Column
     }
 
     /**
+     * Add default value for a column
+     *
+     * @param mixed $default_value
+     * @return static
+     */
+    public function default($default_value)
+    {
+        $this->default = $default_value;
+
+        return $this;
+    }
+
+    /**
+     * Set column to unique
+     *
+     * @return static
+     */
+    public function unique()
+    {
+        $this->unique = true;
+
+        return $this;
+    }
+
+    /**
      * Get column in sql query
      *
      * @return string
@@ -88,6 +127,14 @@ class Column
             $sql .= " NULL";
         } else {
             $sql .= " NOT NULL";
+        }
+
+        if ($this->default !== null) {
+            $sql .= " DEFAULT {$this->default}";
+        }
+
+        if ($this->unique) {
+            $sql .= " UNIQUE";
         }
 
         return $sql;

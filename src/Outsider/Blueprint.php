@@ -55,6 +55,54 @@ class Blueprint
         return $column;
     }
 
+    public function boolean($column_name)
+    {
+        $column          = new Column($column_name, "BOOL", false);
+        $this->columns[] = $column;
+
+        return $column;
+    }
+
+    /**
+     * Create a column of type 'TIME'
+     *
+     * @param string $column_name
+     * @return Column
+     */
+    public function time($column_name)
+    {
+        $column          = new Column($column_name, "TIME", false);
+        $this->columns[] = $column;
+
+        return $column;
+    }
+
+    /**
+     * Create a column of type timestamp
+     *
+     * @param string $column_name
+     * @return Column
+     */
+    public function timestamp($column_name)
+    {
+        $column          = new Column($column_name, "TIMESTAMP", false);
+        $this->columns[] = $column;
+
+        return $column;
+    }
+
+    /**
+     * Create created_at and updated_at timestamps
+     *
+     * @return void
+     */
+    public function timestamps()
+    {
+        $this->timestamp("created_at")->nullable()->default("CURRENT_TIMESTAMP");
+
+        $this->timestamp("updated_at")->nullable()->default("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP");
+    }
+
     /**
      * Get all of the columns in $sql query string
      *
