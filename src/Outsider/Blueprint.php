@@ -62,6 +62,9 @@ class Blueprint
      */
     public function to_sql()
     {
-        return implode(", ", array_map(fn ($col) => $col->to_sql(), $this->columns));
+        $columns = array_map(fn (Column $col) => $col->to_sql(), $this->columns);
+        $columns = implode(", ", $columns);
+
+        return $columns;
     }
 }
