@@ -2,9 +2,6 @@
 
 namespace Abyss\Outsider;
 
-use Abyss\Core\Helper;
-use Closure;
-
 class Schema
 {
     /**
@@ -26,7 +23,8 @@ class Schema
         // * Create query
         $sql = "CREATE TABLE $table ($columns)";
 
-        Helper::dd($sql);
+        // * Execute the query
+        self::_execute($sql);
     }
 
     /**
@@ -40,7 +38,22 @@ class Schema
         // * Create query
         $sql = "DROP TABLE {$table}";
 
-        var_dump($sql);
+        // * Execute the query
+        self::_execute($sql);
+    }
+
+    /**
+     * Execute the given sql query
+     *
+     * @param string $query
+     * @return void
+     */
+    private static function _execute($query)
+    {
+        $db = Outsider::get_connection();
+
+        $statement = $db->prepare($query);
+        $statement->execute();
     }
 }
 

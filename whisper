@@ -1,0 +1,22 @@
+#!/usr/bin/env php
+<?php
+
+// Register the Composer autoloader...
+require __DIR__ . '/vendor/autoload.php';
+require __DIR__ . '/bootstrap/whisper.php';
+
+use Abyss\Whisper\MigrationRunner;
+
+// Capture command-line arguments
+$command = $argv[1] ?? null;
+
+switch ($command) {
+    case 'migrate':
+        // Call the migration runner
+        (new MigrationRunner())->run();
+        break;
+    default:
+        echo "Unknown command: $command\n";
+        echo "Available commands: migrate\n";
+        break;
+}
