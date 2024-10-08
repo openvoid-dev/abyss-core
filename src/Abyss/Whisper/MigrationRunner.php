@@ -6,18 +6,20 @@ use Abyss\Core\Application;
 
 class MigrationRunner
 {
-    protected $migrations_path = '/app/database/migrations/';
+    protected $migrations_path = "/app/database/migrations/";
 
-    public function run()
+    public function run(): void
     {
         echo "Running migrations...\n";
 
         // * Fetch migration files
-        $migration_full_path = Application::get_base_path($this->migrations_path);
-        $migration_files     = glob($migration_full_path . '*.php');
+        $migration_full_path = Application::get_base_path(
+            $this->migrations_path
+        );
+        $migration_files = glob($migration_full_path . "*.php");
 
         foreach ($migration_files as $migration_file) {
-            $migration_name = basename($migration_file, '.php');
+            $migration_name = basename($migration_file, ".php");
 
             // * Get migration class
             $migration_class = require $migration_file;
