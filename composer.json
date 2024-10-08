@@ -1,22 +1,24 @@
 {
-    "name": "abyss/framework",
-    "description": "Abyss framework",
-    "type": "library",
-    "license": "MIT",
-    "autoload": {
-        "psr-4": {
-            "Abyss\\": "src/Abyss/",
-            "App\\": "app/"
-        }
-    },
-    "authors": [
-        {
-            "name": "Antonio Obradović",
-            "email": "antonio@obradovic.dev"
-        }
-    ],
-    "minimum-stability": "stable",
-    "require": {
-        "vlucas/phpdotenv": "^5.6"
+  "name": "abyss/framework",
+  "description": "Abyss framework",
+  "type": "library",
+  "license": "MIT",
+  "autoload": {
+    "psr-4": {
+      "Abyss\\": "src/Abyss/",
+      "App\\": "app/",
+      "App\\Database\\Factories\\": "app/database/factories/"
     }
+  },
+  "authors": [
+    {
+      "name": "Antonio Obradović",
+      "email": "antonio@obradovic.dev"
+    }
+  ],
+  "minimum-stability": "stable",
+  "require": {
+    "vlucas/phpdotenv": "^5.6",
+    "fakerphp/faker": "^1.23"
+  }
 }
