@@ -61,12 +61,16 @@ class Column
      * @param bool $auto_increment
      * @param bool $is_primary
      */
-    public function __construct($name, $type, $auto_increment, $is_primary = false)
-    {
-        $this->name           = $name;
-        $this->type           = $type;
+    public function __construct(
+        $name,
+        $type,
+        $auto_increment,
+        $is_primary = false
+    ) {
+        $this->name = $name;
+        $this->type = $type;
         $this->auto_increment = $auto_increment;
-        $this->is_primary     = $is_primary;
+        $this->is_primary = $is_primary;
     }
 
     /**
@@ -89,7 +93,23 @@ class Column
      */
     public function default($default_value)
     {
-        $this->default = $default_value;
+        // Handle CURRENT_TIMESTAMP without quotes
+        if (
+            strtoupper($default_value) === "CURRENT_TIMESTAMP" ||
+            strtoupper($default_value) ===
+                "CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"
+        ) {
+            $this->default = $default_value;
+        } elseif (is_string($default_value)) {
+            // Wrap string default values in single quotes
+            $this->default = "'" . $default_value . "'";
+        } elseif (is_bool($default_value)) {
+            // Convert boolean to 0 or 1
+            $this->default = $default_value ? 1 : 0;
+        } else {
+            // For numbers or other types, no quotes are needed
+            $this->default = $default_value;
+        }
 
         return $this;
     }

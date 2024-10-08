@@ -36,7 +36,7 @@ class Schema
     public static function drop($table)
     {
         // * Create query
-        $sql = "DROP TABLE {$table}";
+        $sql = "DROP TABLE IF EXISTS {$table}";
 
         // * Execute the query
         self::_execute($sql);
@@ -56,5 +56,3 @@ class Schema
         $statement->execute();
     }
 }
-
-
