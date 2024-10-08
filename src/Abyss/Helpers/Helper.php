@@ -1,6 +1,6 @@
 <?php
 
-namespace Abyss\Core;
+namespace Abyss\Helpers;
 
 use Abyss\Core\Application;
 use Abyss\Horizon\Session;
@@ -15,7 +15,7 @@ class Helper
      * @param mixed $value
      * @return never
      */
-    public static function dd($value) : never
+    public static function dd($value): never
     {
         echo "<pre>";
         var_dump($value);
@@ -29,9 +29,9 @@ class Helper
      * @param string $value
      * @return bool
      */
-    public static function url_is(string $value) : bool
+    public static function url_is(string $value): bool
     {
-        return $_SERVER['REQUEST_URI'] === $value;
+        return $_SERVER["REQUEST_URI"] === $value;
     }
 
     /**
@@ -39,7 +39,7 @@ class Helper
      * @param int $code
      * @return never
      */
-    public static function abort(int $code = 404) : never
+    public static function abort(int $code = 404): never
     {
         http_response_code($code);
 
@@ -54,9 +54,11 @@ class Helper
      * @param mixed $status
      * @return bool
      */
-    public static function authorize($condition, $status = Response::FORBIDDEN) : bool
-    {
-        if (! $condition) {
+    public static function authorize(
+        $condition,
+        $status = Response::FORBIDDEN
+    ): bool {
+        if (!$condition) {
             static::abort($status);
         }
 
@@ -69,7 +71,7 @@ class Helper
      * @param array $attributes
      * @return void
      */
-    public static function view(string $path, array $attributes = []) : void
+    public static function view(string $path, array $attributes = []): void
     {
         extract($attributes);
 
@@ -81,7 +83,7 @@ class Helper
      * @param string $path
      * @return never
      */
-    public static function redirect(string $path) : never
+    public static function redirect(string $path): never
     {
         header("location: {$path}");
         exit();
@@ -93,9 +95,9 @@ class Helper
      * @param mixed $default
      * @return mixed
      */
-    public static function old($key, $default = '')
+    public static function old($key, $default = "")
     {
-        return Session::get('old')[$key] ?? $default;
+        return Session::get("old")[$key] ?? $default;
     }
 
     /**
@@ -105,7 +107,7 @@ class Helper
      * @param mixed $default_value
      * @return mixed
      */
-    public static function env(string $key, mixed $default_value = "") : mixed
+    public static function env(string $key, mixed $default_value = ""): mixed
     {
         if (isset($_ENV[$key])) {
             return $_ENV[$key];
@@ -114,5 +116,12 @@ class Helper
         $value = getenv($key);
 
         return $value !== false ? $value : $default_value;
+    }
+
+    public static function fake()
+    {
+        $faker = \Faker\Factory::create();
+
+        return $faker;
     }
 }

@@ -4,25 +4,24 @@
  * Core application config
  */
 
-use Abyss\Core\Helper;
+use Abyss\Helpers\Helper;
 
 return [
     /**
      * Application name
      */
 
-
-    'name'     => Helper::env('APP_NAME', 'Abyss'),
+    "name" => Helper::env("APP_NAME", "Abyss"),
 
     /**
      * Application environment
      */
 
-    'env'      => Helper::env("APP_ENV", "development"),
+    "env" => Helper::env("APP_ENV", "development"),
 
     /**
      * Application timezone
      */
 
-    'timezone' => Helper::env("APP_TIMEZONE", "Europe/Zagreb"),
+    "timezone" => Helper::env("APP_TIMEZONE", "Europe/Zagreb"),
 ];
