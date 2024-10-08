@@ -16,10 +16,10 @@ abstract class Controller
      * @param array $props
      * @return void
      */
-    public static function view(string $page, array $props = []) : void
+    public static function view(string $page, array $props = []): void
     {
-        // extract($props);
+        extract($props);
 
-        require Application::get_base_path("/app/views/" . $page . '.php');
+        require Application::get_base_path("/app/views/" . $page . ".php");
     }
 }
