@@ -2,27 +2,30 @@
 
 namespace Abyss\Outsider;
 
+use Error;
+use Exception;
 use PDO;
 
 class QueryBuilder
 {
-    protected $connection;
+    protected PDO $connection;
     protected $table;
-    protected $wheres     = [];
+    protected $wheres = [];
     protected $limit;
     protected $offset;
-    protected $bindings   = [];
+    protected $bindings = [];
 
     public function __construct($table)
     {
-        $this->table      = $table;
-        $this->connection = Outsider::get_connection();  // Use the database connection from Outsider
+        $this->table = $table;
+        $this->connection = Outsider::get_connection(); // Use the database connection from Outsider
     }
 
-    public function where($column, $operator, $value)
+    public function where($column, $operator, $value): QueryBuilder
     {
-        $this->wheres[]   = "$column $operator ?";
-        $this->bindings[] = $value;
+        $this->wheres[] = "$column $operator :$column";
+        $this->bindings[":$column"] = $value;
+
         return $this;
     }
 
@@ -42,8 +45,8 @@ class QueryBuilder
     {
         $sql = "SELECT * FROM {$this->table}";
 
-        if (! empty($this->wheres)) {
-            $sql .= " WHERE " . implode(' AND ', $this->wheres);
+        if (!empty($this->wheres)) {
+            $sql .= " WHERE " . implode(" AND ", $this->wheres);
         }
 
         if ($this->limit) {
@@ -55,7 +58,13 @@ class QueryBuilder
         }
 
         $statement = $this->connection->prepare($sql);
-        $statement->execute($this->bindings);
+        var_dump($statement);
+
+        try {
+            $statement->execute($this->bindings);
+        } catch (Exception $error) {
+            throw new Error($error);
+        }
 
         return $statement->fetchAll(PDO::FETCH_ASSOC);
     }
@@ -69,10 +78,10 @@ class QueryBuilder
 
     public function insert(array $data)
     {
-        $columns      = implode(', ', array_keys($data));
-        $placeholders = implode(', ', array_fill(0, count($data), '?'));
+        $columns = implode(", ", array_keys($data));
+        $placeholders = implode(", ", array_fill(0, count($data), "?"));
 
-        $sql       = "INSERT INTO {$this->table} ($columns) VALUES ($placeholders)";
+        $sql = "INSERT INTO {$this->table} ($columns) VALUES ($placeholders)";
         $statement = $this->connection->prepare($sql);
         $statement->execute(array_values($data));
 
@@ -81,12 +90,12 @@ class QueryBuilder
 
     public function update(array $data, $primary_key, $id)
     {
-        $setClause = implode(' = ?, ', array_keys($data)) . ' = ?';
+        $setClause = implode(" = ?, ", array_keys($data)) . " = ?";
 
-        $sql       = "UPDATE {$this->table} SET $setClause WHERE $primary_key = ?";
+        $sql = "UPDATE {$this->table} SET $setClause WHERE $primary_key = ?";
         $statement = $this->connection->prepare($sql);
 
-        $bindings   = array_values($data);
+        $bindings = array_values($data);
         $bindings[] = $id;
 
         return $statement->execute($bindings);
@@ -94,7 +103,7 @@ class QueryBuilder
 
     public function delete($primary_key, $id)
     {
-        $sql       = "DELETE FROM {$this->table} WHERE $primary_key = ?";
+        $sql = "DELETE FROM {$this->table} WHERE $primary_key = ?";
         $statement = $this->connection->prepare($sql);
         return $statement->execute([$id]);
     }
