@@ -18,6 +18,5 @@ trait HasFactory
 
         // Set the count and state for the factory
         return $factory->count(is_numeric($count) ? $count : null);
-        // ->state(is_callable($count) || is_array($count) ? $count : $state);
     }
 }

@@ -1,23 +1,29 @@
 #!/usr/bin/env php
+
 <?php
 // Register the Composer autoloader...
 require __DIR__ . "/vendor/autoload.php";
 require __DIR__ . "/bootstrap/whisper.php";
 
-use Abyss\Whisper\MigrationRunner;
 use Abyss\Whisper\Serve;
+use Abyss\Whisper\MigrationRunner;
+use Abyss\Whisper\SeedDatabase;
 
 // Capture command-line arguments
 $command = $argv[1] ?? null;
 
 switch ($command) {
+    case "serve":
+        // Start the Abyss server
+        (new Serve())->handle();
+        break;
     case "migrate":
         // Call the migration runner
         (new MigrationRunner())->run();
         break;
-    case "serve":
-        // Start the Abyss server
-        (new Serve())->handle();
+    case "seed":
+        // Call the migration runner
+        (new SeedDatabase())->run();
         break;
     default:
         echo "Unknown command: $command\n";
