@@ -16,7 +16,7 @@ abstract class Model
      *
      * @var string
      **/
-    public static $primary_key = "id";
+    protected static $primary_key = "id";
 
     /**
      * All columns that should never be
@@ -35,19 +35,9 @@ abstract class Model
     {
         return new QueryBuilder(
             static::get_table(),
-            static::get_hidden_columns()
+            static::get_hidden_columns(),
+            static::get_primary_key()
         );
-    }
-
-    /**
-     * Find a row based on its primary key value
-     *
-     * @param mixed $id
-     * @return array
-     **/
-    public static function find(mixed $id): array
-    {
-        return static::query()->where(self::get_primary_key(), "=", $id)->get();
     }
 
     /**

@@ -60,16 +60,28 @@ class QueryBuilder
     protected $hidden = [];
 
     /**
+     * Name of the primary key
+     *
+     * @var string
+     **/
+    protected $primary_key = "id";
+
+    /**
      * Construct a new query class
      *
      * @param string $table
      * @param array $hidden
+     * @param string $primary_key
      * @return void
      **/
-    public function __construct(string $table, array $hidden)
-    {
+    public function __construct(
+        string $table,
+        array $hidden,
+        string $primary_key
+    ) {
         $this->table = $table;
         $this->hidden = $hidden;
+        $this->primary_key = $primary_key;
 
         $this->connection = Outsider::get_connection();
     }
@@ -170,6 +182,47 @@ class QueryBuilder
         $results = $this->get();
 
         return $results ? $results[0] : null;
+    }
+
+    /**
+     * Find a row based on its primary key value
+     *
+     * @param mixed $id
+     * @return array
+     **/
+    public function find(mixed $id): array
+    {
+        return $this->where($this->primary_key, "=", $id)->get();
+    }
+
+    /**
+     * Create a custom raw sql query with bindings
+     *
+     * @param string $query
+     * @param array $bindings
+     * @return array|bool
+     **/
+    public function raw_sql(string $query, array $bindings = []): array|bool
+    {
+        $statement = $this->connection->prepare($query);
+
+        try {
+            $statement->execute($bindings);
+        } catch (Exception $error) {
+            throw new Error($error);
+        }
+
+        $data = $statement->fetchAll(PDO::FETCH_ASSOC);
+
+        if (!empty($this->hidden)) {
+            foreach ($data as $key => $row) {
+                foreach ($this->hidden as $hidden_column) {
+                    unset($data[$key][$hidden_column]);
+                }
+            }
+        }
+
+        return $data;
     }
 
     // public function insert(array $data)
