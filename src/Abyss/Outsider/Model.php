@@ -27,6 +27,14 @@ abstract class Model
     protected static $hidden = [];
 
     /**
+     * All columns that are allowed to
+     * be assigned a value to
+     *
+     * @var array
+     **/
+    protected static $fillable = [];
+
+    /**
      * Create a new query
      *
      * @return QueryBuilder
@@ -36,7 +44,8 @@ abstract class Model
         return new QueryBuilder(
             static::get_table(),
             static::get_hidden_columns(),
-            static::get_primary_key()
+            static::get_primary_key(),
+            static::get_fillable_columns()
         );
     }
 
@@ -77,5 +86,15 @@ abstract class Model
     public static function get_hidden_columns(): array
     {
         return static::$hidden;
+    }
+
+    /**
+     * Get models fillable columns
+     *
+     * @return array
+     **/
+    public static function get_fillable_columns(): array
+    {
+        return static::$fillable;
     }
 }

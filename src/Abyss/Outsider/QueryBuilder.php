@@ -60,6 +60,14 @@ class QueryBuilder
     protected $hidden = [];
 
     /**
+     * All columns that are allowed to
+     * be assigned a value to
+     *
+     * @var array
+     **/
+    protected $fillable = [];
+
+    /**
      * Name of the primary key
      *
      * @var string
@@ -72,16 +80,19 @@ class QueryBuilder
      * @param string $table
      * @param array $hidden
      * @param string $primary_key
+     * @param array $fillable
      * @return void
      **/
     public function __construct(
         string $table,
         array $hidden,
-        string $primary_key
+        string $primary_key,
+        array $fillable
     ) {
         $this->table = $table;
         $this->hidden = $hidden;
         $this->primary_key = $primary_key;
+        $this->fillable = $fillable;
 
         $this->connection = Outsider::get_connection();
     }
@@ -225,17 +236,53 @@ class QueryBuilder
         return $data;
     }
 
-    // public function insert(array $data)
-    // {
-    //     $columns = implode(", ", array_keys($data));
-    //     $placeholders = implode(", ", array_fill(0, count($data), "?"));
+    /**
+     * Create a new row
+     *
+     * @param array $data
+     * @return void
+     **/
+    public function create(array $data): void
+    {
+        $columns = [];
+        $bindings = [];
+        $values = [];
 
-    //     $sql = "INSERT INTO {$this->table} ($columns) VALUES ($placeholders)";
-    //     $statement = $this->connection->prepare($sql);
-    //     $statement->execute(array_values($data));
+        foreach ($data as $key => $row) {
+            if (!in_array($key, $this->fillable)) {
+                continue;
+            }
 
-    //     return $this->connection->lastInsertId();
-    // }
+            $columns[] = $key;
+            $bindings[] = ":$key";
+            $values[":$key"] = $row;
+        }
+
+        $columns_string = implode(", ", $columns);
+        $bindings_string = implode(", ", $bindings);
+
+        $statement = $this->connection->prepare(
+            "INSERT INTO {$this->table} ($columns_string) VALUES ($bindings_string)"
+        );
+
+        try {
+            $statement->execute($values);
+        } catch (Exception $error) {
+            throw new Error($error);
+        }
+    }
+
+    /**
+     * Get last created row
+     *
+     * @return array
+     **/
+    public function last(): array
+    {
+        $last_inserted_id = $this->connection->lastInsertId($this->primary_key);
+
+        return $this->find($last_inserted_id);
+    }
 
     // public function update(array $data, $primary_key, $id)
     // {
