@@ -8,40 +8,121 @@ use PDO;
 
 class QueryBuilder
 {
+    /**
+     * DB connection
+     *
+     * @var PDO
+     **/
     protected PDO $connection;
+
+    /**
+     * Table name
+     *
+     * @var string
+     **/
     protected $table;
+
+    /**
+     * All of the queries where clauses
+     *
+     * @var array
+     **/
     protected $wheres = [];
+
+    /**
+     * Value that represents the limit to how
+     * many rows a query should get
+     *
+     * @var int
+     **/
     protected $limit;
+
+    /**
+     * Value that represents the offset
+     *
+     * @var int
+     **/
     protected $offset;
+
+    /**
+     * All of the bindings to set in execute function
+     *
+     * @var array
+     **/
     protected $bindings = [];
 
-    public function __construct($table)
+    /**
+     * Columns that should never be sent
+     * from the server
+     *
+     * @var array
+     **/
+    protected $hidden = [];
+
+    /**
+     * Construct a new query class
+     *
+     * @param string $table
+     * @param array $hidden
+     * @return void
+     **/
+    public function __construct(string $table, array $hidden)
     {
         $this->table = $table;
-        $this->connection = Outsider::get_connection(); // Use the database connection from Outsider
+        $this->hidden = $hidden;
+
+        $this->connection = Outsider::get_connection();
     }
 
-    public function where($column, $operator, $value): QueryBuilder
-    {
+    /**
+     * Set where clause
+     *
+     * @param string $column
+     * @param string $operator
+     * @param mixed $value
+     * @return QueryBuilder
+     **/
+    public function where(
+        string $column,
+        string $operator,
+        mixed $value
+    ): QueryBuilder {
         $this->wheres[] = "$column $operator :$column";
         $this->bindings[":$column"] = $value;
 
         return $this;
     }
 
-    public function limit($limit)
+    /**
+     * Set a limit
+     *
+     * @param int $limit
+     * @return QueryBuilder
+     **/
+    public function limit(int $limit): QueryBuilder
     {
         $this->limit = $limit;
         return $this;
     }
 
-    public function offset($offset)
+    /**
+     * Set offset
+     *
+     * @param int $$offset
+     * @return QueryBuilder
+     **/
+    public function offset(int $offset): QueryBuilder
     {
         $this->offset = $offset;
         return $this;
     }
 
-    public function get()
+    /**
+     * Create a GET query
+     *
+     * @return array|bool
+     **/
+    public function get(): array|bool
     {
         $sql = "SELECT * FROM {$this->table}";
 
@@ -58,7 +139,6 @@ class QueryBuilder
         }
 
         $statement = $this->connection->prepare($sql);
-        var_dump($statement);
 
         try {
             $statement->execute($this->bindings);
@@ -66,45 +146,61 @@ class QueryBuilder
             throw new Error($error);
         }
 
-        return $statement->fetchAll(PDO::FETCH_ASSOC);
+        $data = $statement->fetchAll(PDO::FETCH_ASSOC);
+
+        if (!empty($this->hidden)) {
+            foreach ($data as $key => $row) {
+                foreach ($this->hidden as $hidden_column) {
+                    unset($data[$key][$hidden_column]);
+                }
+            }
+        }
+
+        return $data;
     }
 
-    public function first()
+    /**
+     * Get only the first row
+     *
+     * @return array|bool
+     **/
+    public function first(): array|bool
     {
         $this->limit(1);
         $results = $this->get();
+
         return $results ? $results[0] : null;
     }
 
-    public function insert(array $data)
-    {
-        $columns = implode(", ", array_keys($data));
-        $placeholders = implode(", ", array_fill(0, count($data), "?"));
+    // public function insert(array $data)
+    // {
+    //     $columns = implode(", ", array_keys($data));
+    //     $placeholders = implode(", ", array_fill(0, count($data), "?"));
 
-        $sql = "INSERT INTO {$this->table} ($columns) VALUES ($placeholders)";
-        $statement = $this->connection->prepare($sql);
-        $statement->execute(array_values($data));
+    //     $sql = "INSERT INTO {$this->table} ($columns) VALUES ($placeholders)";
+    //     $statement = $this->connection->prepare($sql);
+    //     $statement->execute(array_values($data));
 
-        return $this->connection->lastInsertId();
-    }
+    //     return $this->connection->lastInsertId();
+    // }
 
-    public function update(array $data, $primary_key, $id)
-    {
-        $setClause = implode(" = ?, ", array_keys($data)) . " = ?";
+    // public function update(array $data, $primary_key, $id)
+    // {
+    //     $setClause = implode(" = ?, ", array_keys($data)) . " = ?";
 
-        $sql = "UPDATE {$this->table} SET $setClause WHERE $primary_key = ?";
-        $statement = $this->connection->prepare($sql);
+    //     $sql = "UPDATE {$this->table} SET $setClause WHERE $primary_key = ?";
+    //     $statement = $this->connection->prepare($sql);
 
-        $bindings = array_values($data);
-        $bindings[] = $id;
+    //     $bindings = array_values($data);
+    //     $bindings[] = $id;
 
-        return $statement->execute($bindings);
-    }
+    //     return $statement->execute($bindings);
+    // }
 
-    public function delete($primary_key, $id)
-    {
-        $sql = "DELETE FROM {$this->table} WHERE $primary_key = ?";
-        $statement = $this->connection->prepare($sql);
-        return $statement->execute([$id]);
-    }
+    // public function delete($primary_key, $id)
+    // {
+    //     $sql = "DELETE FROM {$this->table} WHERE $primary_key = ?";
+    //     $statement = $this->connection->prepare($sql);
+    //     return $statement->execute([$id]);
+    // }
 }
