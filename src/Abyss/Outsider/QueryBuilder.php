@@ -289,8 +289,6 @@ class QueryBuilder
         $values = array_values($data);
         $values[] = $primary_key_value;
 
-        var_dump($values);
-
         $query = "UPDATE {$this->table} SET $set_clause WHERE $primary_key = ?";
 
         $statement = $this->connection->prepare($query);
