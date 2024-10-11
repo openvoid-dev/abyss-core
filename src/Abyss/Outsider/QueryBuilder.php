@@ -273,6 +273,56 @@ class QueryBuilder
     }
 
     /**
+     * Update a row in a table
+     *
+     * @param array $data
+     * @param string $primary_key
+     * @param mixed $primary_key_value
+     * @return void
+     **/
+    public function update(
+        array $data,
+        string $primary_key,
+        mixed $primary_key_value
+    ): void {
+        $set_clause = implode(" = ?, ", array_keys($data)) . " = ?";
+        $values = array_values($data);
+        $values[] = $primary_key_value;
+
+        var_dump($values);
+
+        $query = "UPDATE {$this->table} SET $set_clause WHERE $primary_key = ?";
+
+        $statement = $this->connection->prepare($query);
+
+        try {
+            $statement->execute($values);
+        } catch (Exception $error) {
+            throw new Error($error);
+        }
+    }
+
+    /**
+     * Destroy a row in a table
+     *
+     * @return void
+     **/
+    public function destroy(string $primary_key, mixed $primary_key_value): void
+    {
+        $query = "DELETE FROM {$this->table} WHERE $primary_key = :$primary_key";
+        $values = [
+            ":$primary_key" => $primary_key_value,
+        ];
+        $statement = $this->connection->prepare($query);
+
+        try {
+            $statement->execute($values);
+        } catch (Exception $error) {
+            throw new Error($error);
+        }
+    }
+
+    /**
      * Get last created row
      *
      * @return array
@@ -283,24 +333,4 @@ class QueryBuilder
 
         return $this->find($last_inserted_id);
     }
-
-    // public function update(array $data, $primary_key, $id)
-    // {
-    //     $setClause = implode(" = ?, ", array_keys($data)) . " = ?";
-
-    //     $sql = "UPDATE {$this->table} SET $setClause WHERE $primary_key = ?";
-    //     $statement = $this->connection->prepare($sql);
-
-    //     $bindings = array_values($data);
-    //     $bindings[] = $id;
-
-    //     return $statement->execute($bindings);
-    // }
-
-    // public function delete($primary_key, $id)
-    // {
-    //     $sql = "DELETE FROM {$this->table} WHERE $primary_key = ?";
-    //     $statement = $this->connection->prepare($sql);
-    //     return $statement->execute([$id]);
-    // }
 }
