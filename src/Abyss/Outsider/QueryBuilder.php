@@ -30,6 +30,13 @@ class QueryBuilder
     protected $wheres = [];
 
     /**
+     * What to select from db, default is all (*)
+     *
+     * @var array
+     **/
+    protected $selects = [];
+
+    /**
      * Value that represents the limit to how
      * many rows a query should get
      *
@@ -110,8 +117,21 @@ class QueryBuilder
         string $operator,
         mixed $value
     ): QueryBuilder {
-        $this->wheres[] = "$column $operator :$column";
-        $this->bindings[":$column"] = $value;
+        $this->wheres[] = "$column $operator ?";
+        $this->bindings[] = $value;
+
+        return $this;
+    }
+
+    /**
+     * Set select values
+     *
+     * @param string $column
+     * @return QueryBuilder
+     **/
+    public function select(string ...$column): QueryBuilder
+    {
+        $this->selects = $column;
 
         return $this;
     }
@@ -147,21 +167,21 @@ class QueryBuilder
      **/
     public function get(): array|bool
     {
-        $sql = "SELECT * FROM {$this->table}";
+        $query = "SELECT * FROM {$this->table}";
 
         if (!empty($this->wheres)) {
-            $sql .= " WHERE " . implode(" AND ", $this->wheres);
+            $query .= " WHERE " . implode(" AND ", $this->wheres);
         }
 
         if ($this->limit) {
-            $sql .= " LIMIT {$this->limit}";
+            $query .= " LIMIT {$this->limit}";
         }
 
         if ($this->offset) {
-            $sql .= " OFFSET {$this->offset}";
+            $query .= " OFFSET {$this->offset}";
         }
 
-        $statement = $this->connection->prepare($sql);
+        $statement = $this->connection->prepare($query);
 
         try {
             $statement->execute($this->bindings);
@@ -196,29 +216,46 @@ class QueryBuilder
     }
 
     /**
-     * Find a row based on its primary key value
+     * Find a first row
      *
-     * @param mixed $id
      * @return array
      **/
-    public function find(mixed $id): array
+    public function find(): array
     {
-        return $this->where($this->primary_key, "=", $id)->get();
+        return $this->limit(1)->find_many();
     }
 
     /**
-     * Create a custom raw sql query with bindings
+     * Find many rows
      *
-     * @param string $query
-     * @param array $bindings
-     * @return array|bool
+     * @return array
      **/
-    public function raw_sql(string $query, array $bindings = []): array|bool
+    public function find_many(): array
     {
+        $query = "SELECT * FROM {$this->table}";
+
+        if (!empty($this->selects)) {
+            $selects = implode(", ", $this->selects);
+
+            $query = "SELECT $selects FROM {$this->table}";
+        }
+
+        if (!empty($this->wheres)) {
+            $query .= " WHERE " . implode(" AND ", $this->wheres);
+        }
+
+        if ($this->limit) {
+            $query .= " LIMIT {$this->limit}";
+        }
+
+        if ($this->offset) {
+            $query .= " OFFSET {$this->offset}";
+        }
+
         $statement = $this->connection->prepare($query);
 
         try {
-            $statement->execute($bindings);
+            $statement->execute($this->bindings);
         } catch (Exception $error) {
             throw new Error($error);
         }
@@ -273,23 +310,51 @@ class QueryBuilder
     }
 
     /**
+     * Create many rows
+     *
+     * @param array $data
+     * @return void
+     **/
+    public function create_many(array ...$data): void
+    {
+        foreach ($data as $row) {
+            // * Call create method for each array
+            $this->create($row);
+        }
+    }
+
+    /**
      * Update a row in a table
      *
      * @param array $data
-     * @param string $primary_key
-     * @param mixed $primary_key_value
      * @return void
      **/
-    public function update(
-        array $data,
-        string $primary_key,
-        mixed $primary_key_value
-    ): void {
+    public function update(array $data): void
+    {
+        $this->limit(1)->update_many($data);
+    }
+
+    /**
+     * Update multiple rows in a table
+     *
+     * @param array $data
+     * @return void
+     **/
+    public function update_many(array $data): void
+    {
         $set_clause = implode(" = ?, ", array_keys($data)) . " = ?";
         $values = array_values($data);
-        $values[] = $primary_key_value;
+        $values = array_merge($values, $this->bindings);
 
-        $query = "UPDATE {$this->table} SET $set_clause WHERE $primary_key = ?";
+        $query = "UPDATE {$this->table} SET $set_clause";
+
+        if (!empty($this->wheres)) {
+            $query .= " WHERE " . implode(" AND ", $this->wheres);
+        }
+
+        if ($this->limit) {
+            $query .= " LIMIT {$this->limit}";
+        }
 
         $statement = $this->connection->prepare($query);
 
@@ -305,19 +370,67 @@ class QueryBuilder
      *
      * @return void
      **/
-    public function destroy(string $primary_key, mixed $primary_key_value): void
+    public function destroy(): void
     {
-        $query = "DELETE FROM {$this->table} WHERE $primary_key = :$primary_key";
-        $values = [
-            ":$primary_key" => $primary_key_value,
-        ];
+        $this->limit(1)->destroy_many();
+    }
+
+    /**
+     * Destroy multiple rows in a table
+     *
+     * @return void
+     **/
+    public function destroy_many(): void
+    {
+        if (empty($this->wheres)) {
+            throw new Error("No where clause added");
+        }
+
+        $query =
+            "DELETE FROM {$this->table} WHERE " .
+            implode(" AND ", $this->wheres);
+
+        if ($this->limit) {
+            $query .= " LIMIT {$this->limit}";
+        }
+
         $statement = $this->connection->prepare($query);
 
         try {
-            $statement->execute($values);
+            $statement->execute($this->bindings);
         } catch (Exception $error) {
             throw new Error($error);
         }
+    }
+
+    /**
+     * Create a custom raw sql query with bindings
+     *
+     * @param string $query
+     * @param array $bindings
+     * @return array|bool
+     **/
+    public function raw_sql(string $query, array $bindings = []): array|bool
+    {
+        $statement = $this->connection->prepare($query);
+
+        try {
+            $statement->execute($bindings);
+        } catch (Exception $error) {
+            throw new Error($error);
+        }
+
+        $data = $statement->fetchAll(PDO::FETCH_ASSOC);
+
+        if (!empty($this->hidden)) {
+            foreach ($data as $key => $row) {
+                foreach ($this->hidden as $hidden_column) {
+                    unset($data[$key][$hidden_column]);
+                }
+            }
+        }
+
+        return $data;
     }
 
     /**
