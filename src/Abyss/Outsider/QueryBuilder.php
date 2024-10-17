@@ -105,20 +105,176 @@ class QueryBuilder
     }
 
     /**
-     * Set where clause
+     * Set a basic where clause to the query
      *
-     * @param string $column
-     * @param string $operator
-     * @param mixed $value
+     * @param mixed $params
      * @return QueryBuilder
      **/
-    public function where(
-        string $column,
-        string $operator,
-        mixed $value
-    ): QueryBuilder {
-        $this->wheres[] = "$column $operator ?";
+    public function where(...$params): QueryBuilder
+    {
+        if (count($params) < 2) {
+            throw new Error("No value defined...");
+        }
+
+        $column = $params[0];
+        $operator = "=";
+        $value = $params[1];
+
+        // * If there are only 2 params treat $operator as '='
+        if (count($params) > 2) {
+            $operator = $params[1];
+            $value = $params[2];
+        }
+
+        $this->wheres[] = [
+            "statement" => "$column $operator ?",
+            "type" => "default",
+        ];
         $this->bindings[] = $value;
+
+        return $this;
+    }
+
+    /**
+     * Set an "or where" clause to the query
+     *
+     * @param mixed $params
+     * @return QueryBuilder
+     **/
+    public function or_where(...$params): QueryBuilder
+    {
+        if (count($params) < 2) {
+            throw new Error("No value defined...");
+        }
+
+        // * If there are only 2 params treat $operator as '='
+        $column = $params[0];
+        $operator = "=";
+        $value = $params[1];
+
+        if (count($params) > 2) {
+            $operator = $params[1];
+            $value = $params[2];
+        }
+
+        $this->wheres[] = [
+            "statement" => "$column $operator ?",
+            "type" => "or",
+        ];
+        $this->bindings[] = $value;
+
+        return $this;
+    }
+
+    /**
+     * Filter results between two values
+     *
+     * @param string $column
+     * @param array $values
+     * @return QueryBuilder
+     **/
+    public function where_between($column, $values): QueryBuilder
+    {
+        $this->wheres[] = [
+            "statement" => "$column BETWEEN ? AND ?",
+            "type" => "default",
+        ];
+        $this->bindings[] = $values[0];
+        $this->bindings[] = $values[1];
+
+        return $this;
+    }
+
+    /**
+     * Filter results where the column value is
+     * outside the range of 2 values
+     *
+     * @param string $column
+     * @param array $values
+     * @return QueryBuilder
+     **/
+    public function where_outside($column, $values): QueryBuilder
+    {
+        $this->wheres[] = [
+            "statement" => "$column NOT BETWEEN ? AND ?",
+            "type" => "default",
+        ];
+        $this->bindings[] = $values[0];
+        $this->bindings[] = $values[1];
+
+        return $this;
+    }
+
+    /**
+     * Filters results where the column value is
+     * in a given array of values.
+     *
+     * @param string $column
+     * @param array $values
+     * @return QueryBuilder
+     **/
+    public function where_in($column, $values): QueryBuilder
+    {
+        $placeholders = implode(",", array_fill(0, count($values), "?"));
+
+        $this->wheres[] = [
+            "statement" => "$column IN ($placeholders)",
+            "type" => "default",
+        ];
+        array_push($this->bindings, ...$values);
+
+        return $this;
+    }
+
+    /**
+     * Filters results where the column value is
+     * not in a given array of values.
+     *
+     * @param string $column
+     * @param array $values
+     * @return QueryBuilder
+     **/
+    public function where_not_in($column, $values): QueryBuilder
+    {
+        $placeholders = implode(",", array_fill(0, count($values), "?"));
+
+        $this->wheres[] = [
+            "statement" => "$column NOT IN ($placeholders)",
+            "type" => "default",
+        ];
+        array_push($this->bindings, ...$values);
+
+        return $this;
+    }
+
+    /**
+     * Filters results where the column is NULL.
+     *
+     * @param string $column
+     * @return QueryBuilder
+     **/
+    public function where_null($column): QueryBuilder
+    {
+        $this->wheres[] = [
+            "statement" => "$column IS NULL",
+            "type" => "default",
+        ];
+
+        return $this;
+    }
+
+    /**
+     * Filters results where the column is NOT NULL.
+     *
+     * @param string $column
+     * @return QueryBuilder
+     **/
+    public function where_not_null($column): QueryBuilder
+    {
+        $this->wheres[] = [
+            "statement" => "$column IS NOT NULL",
+            "type" => "default",
+        ];
 
         return $this;
     }
@@ -241,7 +397,18 @@ class QueryBuilder
         }
 
         if (!empty($this->wheres)) {
-            $query .= " WHERE " . implode(" AND ", $this->wheres);
+            $query .= " WHERE 1=1 ";
+
+            foreach ($this->wheres as $where) {
+                switch ($where["type"]) {
+                    case "default":
+                        $query .= " AND {$where["statement"]}";
+                        break;
+                    case "or":
+                        $query .= " OR {$where["statement"]}";
+                        break;
+                }
+            }
         }
 
         if ($this->limit) {
@@ -431,6 +598,52 @@ class QueryBuilder
         }
 
         return $data;
+    }
+
+    /**
+     * Show a select statement with bindings
+     *
+     * @return array
+     **/
+    public function show_select_statement(): array
+    {
+        $query = "SELECT * FROM {$this->table}";
+
+        if (!empty($this->selects)) {
+            $selects = implode(", ", $this->selects);
+
+            $query = "SELECT $selects FROM {$this->table}";
+        }
+
+        if (!empty($this->wheres)) {
+            $query .= " WHERE 1=1 ";
+
+            foreach ($this->wheres as $where) {
+                switch ($where["type"]) {
+                    case "default":
+                        $query .= " AND {$where["statement"]}";
+                        break;
+                    case "or":
+                        $query .= " OR {$where["statement"]}";
+                        break;
+                }
+            }
+        }
+
+        if ($this->limit) {
+            $query .= " LIMIT {$this->limit}";
+        }
+
+        if ($this->offset) {
+            $query .= " OFFSET {$this->offset}";
+        }
+
+        $statement = $this->connection->prepare($query);
+
+        return [
+            "statement" => $statement,
+            "bindings" => $this->bindings,
+        ];
     }
 
     /**
