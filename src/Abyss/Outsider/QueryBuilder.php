@@ -279,6 +279,24 @@ class QueryBuilder
         return $this;
     }
 
+    public function add_wheres_to_query(): string
+    {
+        $query = " WHERE 1=1 ";
+
+        foreach ($this->wheres as $where) {
+            switch ($where["type"]) {
+                case "default":
+                    $query .= " AND {$where["statement"]}";
+                    break;
+                case "or":
+                    $query .= " OR {$where["statement"]}";
+                    break;
+            }
+        }
+
+        return $query;
+    }
+
     /**
      * Set select values
      *
@@ -317,61 +335,6 @@ class QueryBuilder
     }
 
     /**
-     * Create a GET query
-     *
-     * @return array|bool
-     **/
-    public function get(): array|bool
-    {
-        $query = "SELECT * FROM {$this->table}";
-
-        if (!empty($this->wheres)) {
-            $query .= " WHERE " . implode(" AND ", $this->wheres);
-        }
-
-        if ($this->limit) {
-            $query .= " LIMIT {$this->limit}";
-        }
-
-        if ($this->offset) {
-            $query .= " OFFSET {$this->offset}";
-        }
-
-        $statement = $this->connection->prepare($query);
-
-        try {
-            $statement->execute($this->bindings);
-        } catch (Exception $error) {
-            throw new Error($error);
-        }
-
-        $data = $statement->fetchAll(PDO::FETCH_ASSOC);
-
-        if (!empty($this->hidden)) {
-            foreach ($data as $key => $row) {
-                foreach ($this->hidden as $hidden_column) {
-                    unset($data[$key][$hidden_column]);
-                }
-            }
-        }
-
-        return $data;
-    }
-
-    /**
-     * Get only the first row
-     *
-     * @return array|bool
-     **/
-    public function first(): array|bool
-    {
-        $this->limit(1);
-        $results = $this->get();
-
-        return $results ? $results[0] : null;
-    }
-
-    /**
      * Find a first row
      *
      * @return array
@@ -397,18 +360,7 @@ class QueryBuilder
         }
 
         if (!empty($this->wheres)) {
-            $query .= " WHERE 1=1 ";
-
-            foreach ($this->wheres as $where) {
-                switch ($where["type"]) {
-                    case "default":
-                        $query .= " AND {$where["statement"]}";
-                        break;
-                    case "or":
-                        $query .= " OR {$where["statement"]}";
-                        break;
-                }
-            }
+            $query .= $this->add_wheres_to_query();
         }
 
         if ($this->limit) {
@@ -516,7 +468,7 @@ class QueryBuilder
         $query = "UPDATE {$this->table} SET $set_clause";
 
         if (!empty($this->wheres)) {
-            $query .= " WHERE " . implode(" AND ", $this->wheres);
+            $query .= $this->add_wheres_to_query();
         }
 
         if ($this->limit) {
@@ -553,9 +505,8 @@ class QueryBuilder
             throw new Error("No where clause added");
         }
 
-        $query =
-            "DELETE FROM {$this->table} WHERE " .
-            implode(" AND ", $this->wheres);
+        $query = "DELETE FROM {$this->table} ";
+        $query .= $this->add_wheres_to_query();
 
         if ($this->limit) {
             $query .= " LIMIT {$this->limit}";
@@ -616,18 +567,7 @@ class QueryBuilder
         }
 
         if (!empty($this->wheres)) {
-            $query .= " WHERE 1=1 ";
-
-            foreach ($this->wheres as $where) {
-                switch ($where["type"]) {
-                    case "default":
-                        $query .= " AND {$where["statement"]}";
-                        break;
-                    case "or":
-                        $query .= " OR {$where["statement"]}";
-                        break;
-                }
-            }
+            $query .= $this->add_wheres_to_query();
         }
 
         if ($this->limit) {
