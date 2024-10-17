@@ -52,6 +52,13 @@ class QueryBuilder
     protected $offset;
 
     /**
+     * Value that represents the order by
+     *
+     * @var string
+     **/
+    protected $order_by;
+
+    /**
      * All of the bindings to set in execute function
      *
      * @var array
@@ -335,6 +342,20 @@ class QueryBuilder
     }
 
     /**
+     * Order results
+     *
+     * @param string $column
+     * @param string $value
+     * @return QueryBuilder
+     **/
+    public function order_by($column, $value): QueryBuilder
+    {
+        $this->order_by = "ORDER BY $column $value";
+
+        return $this;
+    }
+
+    /**
      * Find a first row
      *
      * @return array
@@ -369,6 +390,10 @@ class QueryBuilder
 
         if ($this->offset) {
             $query .= " OFFSET {$this->offset}";
+        }
+
+        if ($this->order_by) {
+            $query .= " {$this->order_by}";
         }
 
         $statement = $this->connection->prepare($query);
@@ -576,6 +601,10 @@ class QueryBuilder
 
         if ($this->offset) {
             $query .= " OFFSET {$this->offset}";
+        }
+
+        if ($this->order_by) {
+            $query .= " {$this->order_by}";
         }
 
         $statement = $this->connection->prepare($query);
