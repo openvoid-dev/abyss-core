@@ -6,8 +6,25 @@ use Abyss\Core\Application;
 
 class MigrationRunner
 {
+    /**
+     * Location of database migrations
+     *
+     * @var string
+     **/
     protected $migrations_path = "/app/database/migrations/";
 
+    /**
+     * All of the migration classes
+     *
+     * @var array
+     **/
+    protected $migrations = [];
+
+    /**
+     * Run the migrations
+     *
+     * @return void
+     **/
     public function run(): void
     {
         echo "Running migrations...\n";
@@ -24,13 +41,29 @@ class MigrationRunner
             // * Get migration class
             $migration_class = require $migration_file;
 
-            // * Drop the table
-            $migration_class->down();
+            // * If migration has no dependecies put it at the
+            // * beggining of an array
+            if (empty($migration_class->depends_on)) {
+                array_unshift($this->migrations, $migration_class);
 
-            // * Run the migration
-            $migration_class->up();
+                continue;
+            }
 
-            echo "Applied migration: $migration_name\n";
+            $this->migrations[] = $migration_class;
+        }
+
+        // * Drop all tables in reverse order
+        foreach (array_reverse($this->migrations) as $migration) {
+            $migration->down();
+
+            echo "Droped : $migration_name\n";
+        }
+
+        // * Create all tables
+        foreach ($this->migrations as $migration) {
+            $migration->up();
+
+            echo "Created : $migration_name\n";
         }
 
         echo "Migrations completed.\n";

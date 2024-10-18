@@ -9,49 +9,63 @@ class Column
      *
      * @var string;
      */
-    protected $name;
+    public $name;
 
     /**
      * Column type
      *
      * @var string
      */
-    protected $type;
+    public $type;
 
     /**
      * Is column auto increment
      *
      * @var bool
      */
-    protected $auto_increment;
+    public $auto_increment;
 
     /**
      * Is column primary
      *
      * @var bool
      */
-    protected $is_primary;
+    public $is_primary;
 
     /**
      * Can column be nullable
      *
      * @var bool
      */
-    protected $nullable = false;
+    public $nullable = false;
 
     /**
      * Default value for a column
      *
      * @var null|string
      */
-    protected $default = null;
+    public $default = null;
 
     /**
      * Is column unique
      *
      * @var bool
      */
-    protected $unique = false;
+    public $unique = false;
+
+    /**
+     * Is column a foreign key
+     *
+     * @var bool
+     */
+    public $is_foreign_key = false;
+
+    /**
+     * Foreign key table
+     *
+     * @var string|null
+     */
+    public $foreign_key_table = null;
 
     /**
      * Construct new column
@@ -122,6 +136,20 @@ class Column
     public function unique()
     {
         $this->unique = true;
+
+        return $this;
+    }
+
+    /**
+     * Set column to be a foreign key
+     *
+     * @param string $table
+     * @return static
+     */
+    public function foreign_key($table)
+    {
+        $this->is_foreign_key = true;
+        $this->foreign_key_table = $table;
 
         return $this;
     }
