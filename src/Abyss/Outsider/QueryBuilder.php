@@ -37,6 +37,13 @@ class QueryBuilder
     protected $selects = [];
 
     /**
+     * Join statement
+     *
+     * @var string|null
+     **/
+    protected $join_stmt = null;
+
+    /**
      * Value that represents the limit to how
      * many rows a query should get
      *
@@ -57,6 +64,13 @@ class QueryBuilder
      * @var string
      **/
     protected $order_by;
+
+    /**
+     * Value that represents the group by
+     *
+     * @var string
+     **/
+    protected $group_by;
 
     /**
      * All of the bindings to set in execute function
@@ -318,6 +332,65 @@ class QueryBuilder
     }
 
     /**
+     * Add INNER JOIN
+     *
+     * @param string $table_to_join
+     * @param string $main_table_column_name
+     * @param string $operator
+     * @param string $table_to_join_column_name
+     * @return QueryBuilder
+     **/
+    public function join(
+        $table_to_join,
+        $main_table_column_name,
+        $operator,
+        $table_to_join_column_name
+    ): QueryBuilder {
+        $this->join_stmt = "INNER JOIN $table_to_join ON $main_table_column_name $operator $table_to_join_column_name";
+
+        return $this;
+    }
+
+    /**
+     * Add LEFT JOIN
+     *
+     * @param string $table_to_join
+     * @param string $main_table_column_name
+     * @param string $operator
+     * @param string $table_to_join_column_name
+     * @return QueryBuilder
+     **/
+    public function left_join(
+        $table_to_join,
+        $main_table_column_name,
+        $operator,
+        $table_to_join_column_name
+    ): QueryBuilder {
+        $this->join_stmt = "LEFT JOIN $table_to_join ON $main_table_column_name $operator $table_to_join_column_name";
+
+        return $this;
+    }
+
+    /**
+     * Add RIGHT JOIN
+     *
+     * @param string $table_to_join
+     * @param string $main_table_column_name
+     * @param string $operator
+     * @param string $table_to_join_column_name
+     * @return QueryBuilder
+     **/
+    public function right_join(
+        $table_to_join,
+        $main_table_column_name,
+        $operator,
+        $table_to_join_column_name
+    ): QueryBuilder {
+        $this->join_stmt = "RIGHT JOIN $table_to_join ON $main_table_column_name $operator $table_to_join_column_name";
+
+        return $this;
+    }
+    /**
      * Set a limit
      *
      * @param int $limit
@@ -356,6 +429,19 @@ class QueryBuilder
     }
 
     /**
+     * Group results
+     *
+     * @param string $column
+     * @return QueryBuilder
+     **/
+    public function group_by($column): QueryBuilder
+    {
+        $this->group_by = "GROUP BY $column";
+
+        return $this;
+    }
+
+    /**
      * Find a first row
      *
      * @return array
@@ -380,6 +466,11 @@ class QueryBuilder
             $query = "SELECT $selects FROM {$this->table}";
         }
 
+        // * Joins
+        if (!empty($this->join_stmt)) {
+            $query .= " {$this->join_stmt}";
+        }
+
         if (!empty($this->wheres)) {
             $query .= $this->add_wheres_to_query();
         }
@@ -394,6 +485,10 @@ class QueryBuilder
 
         if ($this->order_by) {
             $query .= " {$this->order_by}";
+        }
+
+        if ($this->group_by) {
+            $query .= " {$this->group_by}";
         }
 
         $statement = $this->connection->prepare($query);
@@ -591,6 +686,10 @@ class QueryBuilder
             $query = "SELECT $selects FROM {$this->table}";
         }
 
+        if (!empty($this->join_stmt)) {
+            $query .= " {$this->join_stmt}";
+        }
+
         if (!empty($this->wheres)) {
             $query .= $this->add_wheres_to_query();
         }
@@ -605,6 +704,10 @@ class QueryBuilder
 
         if ($this->order_by) {
             $query .= " {$this->order_by}";
+        }
+
+        if ($this->group_by) {
+            $query .= " {$this->group_by}";
         }
 
         $statement = $this->connection->prepare($query);
