@@ -16,6 +16,13 @@ class QueryBuilder
     protected PDO $connection;
 
     /**
+     * Model string
+     *
+     * @var string
+     **/
+    protected $model;
+
+    /**
      * Table name
      *
      * @var string
@@ -103,8 +110,16 @@ class QueryBuilder
     protected $primary_key = "id";
 
     /**
+     * All of the models relations
+     *
+     * @var array
+     **/
+    protected $relations = [];
+
+    /**
      * Construct a new query class
      *
+     * @param string $model
      * @param string $table
      * @param array $hidden
      * @param string $primary_key
@@ -112,11 +127,13 @@ class QueryBuilder
      * @return void
      **/
     public function __construct(
+        string $model,
         string $table,
         array $hidden,
         string $primary_key,
         array $fillable
     ) {
+        $this->model = $model;
         $this->table = $table;
         $this->hidden = $hidden;
         $this->primary_key = $primary_key;
@@ -390,6 +407,20 @@ class QueryBuilder
 
         return $this;
     }
+
+    /**
+     * Add relation
+     *
+     * @param string $function_name
+     * @return QueryBuilder
+     **/
+    public function with($function_name): QueryBuilder
+    {
+        $this->relations[] = $function_name;
+
+        return $this;
+    }
+
     /**
      * Set a limit
      *
@@ -439,6 +470,67 @@ class QueryBuilder
         $this->group_by = "GROUP BY $column";
 
         return $this;
+    }
+
+    /**
+     * Get data for relations and modify the given array
+     *
+     * @param array $data
+     * @return array
+     **/
+    public function get_relation_data(array $data): array
+    {
+        // * Get model instance
+        $model = new $this->model();
+
+        foreach ($this->relations as $relation) {
+            if (!method_exists($model, $relation)) {
+                throw new Error(
+                    "Relation $relation on model $this->model doesn't exist!"
+                );
+
+                continue;
+            }
+
+            // * Get relation data
+            $relation_specification = $model::$relation();
+
+            // * Get data by which we will get all foreign data
+            $foreign_key_data = array_column(
+                $data,
+                $relation_specification["foreign_key"]
+            );
+
+            // Get relation model class
+            $relation_class = new ($relation_specification["model"])();
+
+            $relation_data = $relation_class
+                ::query()
+                ->where_in("post_id", $foreign_key_data)
+                ->find_many();
+
+            foreach ($data as $key => $data_row) {
+                $data[$key][$relation] = [];
+
+                foreach (
+                    $relation_data
+                    as $relation_data_key => $relation_data_row
+                ) {
+                    if (
+                        $relation_data_row[
+                            $relation_specification["foreign_key"]
+                        ] !== $data_row[$relation_specification["foreign_key"]]
+                    ) {
+                        continue;
+                    }
+
+                    $data[$key][$relation][] = $relation_data_row;
+                    unset($relation_data[$relation_data_key]);
+                }
+            }
+        }
+
+        return $data;
     }
 
     /**
@@ -500,6 +592,11 @@ class QueryBuilder
         }
 
         $data = $statement->fetchAll(PDO::FETCH_ASSOC);
+
+        // * Get all relation data
+        if (!empty($this->relations)) {
+            $data = $this->get_relation_data($data);
+        }
 
         if (!empty($this->hidden)) {
             foreach ($data as $key => $row) {

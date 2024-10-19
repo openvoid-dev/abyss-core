@@ -42,6 +42,7 @@ abstract class Model
     public static function query(): QueryBuilder
     {
         return new QueryBuilder(
+            get_called_class(),
             static::get_table(),
             static::get_hidden_columns(),
             static::get_primary_key(),
@@ -96,5 +97,20 @@ abstract class Model
     public static function get_fillable_columns(): array
     {
         return static::$fillable;
+    }
+
+    public static function get_relations(): array
+    {
+        return static::$relations;
+    }
+
+    public static function has_many($related_model, $foreign_key, $primary_key)
+    {
+        return [
+            "type" => "has_many",
+            "model" => $related_model,
+            "foreign_key" => $foreign_key,
+            "primary_key" => $primary_key,
+        ];
     }
 }
