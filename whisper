@@ -9,6 +9,7 @@ use Abyss\Whisper\Serve;
 use Abyss\Whisper\MigrationRunner;
 use Abyss\Whisper\SeedDatabase;
 use Abyss\Whisper\MakeMigration;
+use Abyss\Whisper\MakeFactory;
 
 // Capture command-line arguments
 $command = $argv[1] ?? null;
@@ -30,6 +31,9 @@ switch ($command) {
         // * Create a migration
         (new MakeMigration($argv))->make();
         break;
+    case "make:factory":
+        (new MakeFactory($argv))->make();
+        break;
     default:
         echo "Unknown command: $command\n";
         echo "Available commands are:\n";
@@ -37,6 +41,7 @@ switch ($command) {
         echo "migrate\n";
         echo "seed\n";
         echo "make:migration\n";
+        echo "make:factory\n";
         break;
 }
 
