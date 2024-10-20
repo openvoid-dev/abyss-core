@@ -44,26 +44,32 @@ class MigrationRunner
             // * If migration has no dependecies put it at the
             // * beggining of an array
             if (empty($migration_class->depends_on)) {
-                array_unshift($this->migrations, $migration_class);
+                array_unshift($this->migrations, [
+                    "class" => $migration_class,
+                    "migration_name" => $migration_name,
+                ]);
 
                 continue;
             }
 
-            $this->migrations[] = $migration_class;
+            $this->migrations[] = [
+                "class" => $migration_class,
+                "migration_name" => $migration_name,
+            ];
         }
 
         // * Drop all tables in reverse order
         foreach (array_reverse($this->migrations) as $migration) {
-            $migration->down();
+            $migration["class"]->down();
 
-            echo "Droped : $migration_name\n";
+            echo "Droped : {$migration["migration_name"]}\n";
         }
 
         // * Create all tables
         foreach ($this->migrations as $migration) {
-            $migration->up();
+            $migration["class"]->up();
 
-            echo "Created : $migration_name\n";
+            echo "Created : {$migration["migration_name"]}\n";
         }
 
         echo "Migrations completed.\n";
