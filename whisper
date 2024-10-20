@@ -8,6 +8,7 @@ require __DIR__ . "/bootstrap/whisper.php";
 use Abyss\Whisper\Serve;
 use Abyss\Whisper\MigrationRunner;
 use Abyss\Whisper\SeedDatabase;
+use Abyss\Whisper\MakeMigration;
 
 // Capture command-line arguments
 $command = $argv[1] ?? null;
@@ -25,9 +26,17 @@ switch ($command) {
         // Call the migration runner
         (new SeedDatabase())->run();
         break;
+    case "make:migration":
+        // * Create a migration
+        (new MakeMigration($argv))->make();
+        break;
     default:
         echo "Unknown command: $command\n";
-        echo "Available commands: migrate\n";
+        echo "Available commands are:\n";
+        echo "serve\n";
+        echo "migrate\n";
+        echo "seed\n";
+        echo "make:migration\n";
         break;
 }
 
