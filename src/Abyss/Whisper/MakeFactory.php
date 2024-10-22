@@ -3,6 +3,7 @@
 namespace Abyss\Whisper;
 
 use Abyss\Core\Application;
+use Abyss\Helpers\StrHelper;
 use Error;
 
 class MakeFactory
@@ -45,6 +46,8 @@ class MakeFactory
 
         // * Create a factory name based on given table name
         $factory_name = ucfirst($table_name);
+        $factory_name = StrHelper::singularize($factory_name);
+
         $factory_name = "{$factory_name}Factory";
 
         $this->factory_name = $factory_name;

@@ -3,6 +3,7 @@
 namespace Abyss\Whisper;
 
 use Abyss\Core\Application;
+use Abyss\Helpers\StrHelper;
 use Error;
 
 class MakeMigration
@@ -45,6 +46,8 @@ class MakeMigration
 
         // * Create a migration name based on given table name
         $migration_name = ucfirst($table_name);
+        $migration_name = StrHelper::singularize($migration_name);
+
         $migration_name = "Create{$migration_name}Migration";
 
         $this->migration_name = $migration_name;
