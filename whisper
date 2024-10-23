@@ -10,6 +10,7 @@ use Abyss\Whisper\MigrationRunner;
 use Abyss\Whisper\SeedDatabase;
 use Abyss\Whisper\MakeMigration;
 use Abyss\Whisper\MakeFactory;
+use Abyss\Whisper\MakeModel;
 
 // Capture command-line arguments
 $command = $argv[1] ?? null;
@@ -34,6 +35,19 @@ switch ($command) {
     case "make:factory":
         (new MakeFactory($argv))->make();
         break;
+    case "make:model":
+        (new MakeModel($argv))->make();
+        break;
+    case "help":
+        echo "Available commands are:\n";
+        echo "serve\n";
+        echo "migrate\n";
+        echo "seed\n";
+        echo "make:migration\n";
+        echo "make:factory\n";
+        echo "make:model\n";
+
+        break;
     default:
         echo "Unknown command: $command\n";
         echo "Available commands are:\n";
@@ -42,6 +56,8 @@ switch ($command) {
         echo "seed\n";
         echo "make:migration\n";
         echo "make:factory\n";
+        echo "make:model\n";
+
         break;
 }
 
