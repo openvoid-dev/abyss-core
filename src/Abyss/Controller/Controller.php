@@ -3,6 +3,7 @@
 namespace Abyss\Controller;
 
 use Abyss\Core\Application;
+use Abyss\Shade\ShadeCompiler;
 
 /**
  * Abstract class for every controller
@@ -18,8 +19,20 @@ abstract class Controller
      */
     public static function view(string $page, array $props = []): void
     {
+        $file_path = Application::get_base_path(
+            "/app/views/" . $page . ".shade.php"
+        );
+
+        if (!file_exists($file_path)) {
+            throw new \Exception("View {$page} not found.");
+        }
+
         extract($props);
 
-        require Application::get_base_path("/app/views/" . $page . ".php");
+        // Compile the Shade template
+        $compiled = ShadeCompiler::compile(file_get_contents($file_path));
+
+        // Evaluate the compiled PHP code
+        eval("?>" . $compiled);
     }
 }
