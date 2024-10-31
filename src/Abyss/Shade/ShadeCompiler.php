@@ -7,16 +7,22 @@ use Error;
 
 class ShadeCompiler
 {
+    /**
+     * Layout of a page
+     *
+     * @var null|string
+     **/
     protected static $layout;
 
     /**
-     * Compile Shade template to php
+     * Compile Shade template to vanilla php
      *
      * @param string $template
      * @return string
      **/
     public static function compile(string $template): string
     {
+        // * Extract layout
         $layout = self::extract_layout($template);
 
         // * Replace `{{ $variable }}` with PHP echo
@@ -58,14 +64,21 @@ class ShadeCompiler
         );
         $template = str_replace("@endfor", "<?php endfor; ?>", $template);
 
+        // * If layout exists, wrap it in it
         if (!empty($layout)) {
             $template = self::wrap_in_layout($layout, $template);
         }
 
+        // * Return plain vanilla php
         return $template;
     }
 
-    // Method to extract the layout directive
+    /**
+     * Extract the layout directive
+     *
+     * @param string &$template
+     * @return string|null
+     **/
     protected static function extract_layout(string &$template): string|null
     {
         if (
@@ -84,10 +97,18 @@ class ShadeCompiler
         return $matches[1];
     }
 
+    /**
+     * Wrap view in extracted layout using the @slot directive
+     *
+     * @param string $layout
+     * @param string &$template
+     * @return string
+     **/
     protected static function wrap_in_layout(
         string $layout,
         string &$template
     ): string {
+        // * Get full layout content
         $layout_content = self::get_layout($layout);
 
         // Replace @slot with template
@@ -96,8 +117,13 @@ class ShadeCompiler
         return $template;
     }
 
-    // Getter for layout
-    public static function get_layout(string $layout): ?string
+    /**
+     * Get layout and compile it to get vanilla php
+     *
+     * @param string $layout
+     * @return string|Error
+     **/
+    public static function get_layout(string $layout): string|Error
     {
         $layout_file_path = Application::get_base_path(
             "/app/views/layouts/$layout.shade.php"
