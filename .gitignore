@@ -1,5 +1,11 @@
 /vendor/
-/app/
+/app
 .env
 /public
 /bootstrap
+/examples
+docker-compose.yml
+Dockerfile
+pint.json
+tailwind.config.js
+tailwindcss

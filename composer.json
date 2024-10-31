@@ -9,7 +9,8 @@
       "App\\": "app/",
       "App\\Database\\Factories\\": "app/database/factories/",
       "App\\Database\\Seeders\\": "app/database/seeders",
-      "App\\Models\\": "app/models/"
+      "App\\Models\\": "app/models/",
+      "App\\Controllers\\": "app/controllers/"
     }
   },
   "authors": [
