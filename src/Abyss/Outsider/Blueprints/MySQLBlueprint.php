@@ -131,7 +131,7 @@ class MySQLBlueprint implements DatabaseBlueprint
      *
      * @return string
      */
-    public function to_sql()
+    public function get_columns()
     {
         // * All the columns
         $columns_query = [];
