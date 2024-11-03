@@ -4,12 +4,19 @@
  * Core database config
  */
 
+use Abyss\Core\Application;
 use Abyss\Helpers\Helper;
 
 return [
-    "default" => Helper::env("DB_CONNECTION", "mysql"),
+    "default" => Helper::env("DB_CONNECTION", "sqlite"),
 
     "connections" => [
+        "sqlite" => [
+            "driver" => "sqlite",
+            "path" => Application::get_base_path(
+                "/app/database/database.sqlite"
+            ),
+        ],
         "mysql" => [
             "driver" => "mysql",
             "url" => Helper::env("DB_URL"),

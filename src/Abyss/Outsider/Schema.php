@@ -11,20 +11,20 @@ class Schema
      * @param Closure $callback
      * @return void
      */
-    public static function create($table, $callback)
+    public static function create($table, $callback): void
     {
+        // * Get correct driver and blueprint based on the used database
+        $db_driver = Outsider::get_db_driver();
+        $db_blueprint = Outsider::get_db_blueprint();
+
         // * Create new blueprint
-        $blueprint = new Blueprint();
-        $callback($blueprint);
+        $callback($db_blueprint);
 
         // * Get columns
-        $columns = $blueprint->to_sql();
+        $columns = $db_blueprint->get_columns();
 
-        // * Create query
-        $sql = "CREATE TABLE $table ($columns)";
-
-        // * Execute the query
-        self::_execute($sql);
+        // * Create a table
+        $db_driver->create_table($table, $columns);
     }
 
     /**
@@ -33,26 +33,11 @@ class Schema
      * @param string $table
      * @return void
      */
-    public static function drop($table)
+    public static function drop($table): void
     {
-        // * Create query
-        $sql = "DROP TABLE IF EXISTS {$table}";
+        // * Get correct db driver
+        $db_driver = Outsider::get_db_driver();
 
-        // * Execute the query
-        self::_execute($sql);
-    }
-
-    /**
-     * Execute the given sql query
-     *
-     * @param string $query
-     * @return void
-     */
-    private static function _execute($query)
-    {
-        $db = Outsider::get_connection();
-
-        $statement = $db->prepare($query);
-        $statement->execute();
+        $db_driver->destroy_table($table);
     }
 }

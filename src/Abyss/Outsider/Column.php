@@ -163,12 +163,12 @@ class Column
     {
         $sql = "{$this->name} {$this->type}";
 
-        if ($this->auto_increment) {
-            $sql .= " AUTO_INCREMENT";
-        }
-
         if ($this->is_primary) {
             $sql .= " PRIMARY KEY";
+        }
+
+        if ($this->auto_increment) {
+            $sql .= " AUTOINCREMENT";
         }
 
         if ($this->nullable) {
