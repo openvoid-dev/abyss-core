@@ -35,13 +35,13 @@ class Component
     /**
      * Add single component to the template
      *
-     * @param array $component
+     * @param string $component
      * @param string $component_directive
      * @param string $template
      * @return string
      **/
     public static function add_component_to_template(
-        array $component,
+        string $component,
         string $component_directive,
         string $template
     ): string {
