@@ -20,12 +20,22 @@ class Serve
 
         $public_dir = Application::get_base_path("/public");
 
-        // * Run Tailwind watcher in the background
-        $tailwindCommand =
-            "tailwindcss -i ./app/resources/css/main.css -o ./public/css/main.css --watch > /dev/null 2>&1 &";
-        passthru($tailwindCommand);
+        // * Start the PHP Server
+        $php_server_command = "php -S {$host}:{$port} -t {$public_dir}";
 
-        // * Run the PHP built-in server
-        passthru("php -S {$host}:{$port} -t {$public_dir}");
+        // * Start the Tailwindcss watcher
+        $tailwind_watcher_command =
+            "tailwindcss -i ./app/resources/css/main.css -o ./public/css/main.css --watch";
+
+        // * Run both commands concurrently
+        $process = proc_open(
+            "($php_server_command) & ($tailwind_watcher_command)",
+            [STDIN, STDOUT, STDERR],
+            $pipes
+        );
+
+        if (is_resource($process)) {
+            proc_close($process);
+        }
     }
 }
