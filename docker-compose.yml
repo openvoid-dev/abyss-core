@@ -1,0 +1,84 @@
+version: "3.8"
+
+services:
+  # MySQL Service
+  mysql:
+    image: mysql:8.0
+    container_name: mysql_container
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: abyssdb
+      MYSQL_USER: abyssuser
+      MYSQL_PASSWORD: abysspassword
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - abyss-network
+    ports:
+      - "3306:3306" # Expose MySQL
+
+  # phpMyAdmin Service
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin_container
+    environment:
+      PMA_HOST: mysql
+      MYSQL_ROOT_PASSWORD: rootpassword
+    networks:
+      - abyss-network
+    ports:
+      - "8080:80" # phpMyAdmin will be accessible on port 8080
+
+  # PHP Container for Abyss App
+  abyss-app:
+    build: .
+    container_name: abyss_container
+    volumes:
+      - /home/antonio/code/abyss-core:/home/antonio/code/abyss-core
+    working_dir: /home/antonio/code/abyss-core
+    command: ["php", "whisper", "serve", "--host=0.0.0.0", "--port=8383"] # Command to run your app
+    networks:
+      - abyss-network
+    ports:
+      - "8383:8383" # Expose port 8383
+    depends_on:
+      - mysql
+
+  # Composer Service
+  composer:
+    image: composer:latest
+    container_name: composer_container
+    volumes:
+      - /home/antonio/code/abyss-core:/home/antonio/code/abyss-core
+    working_dir: /home/antonio/code/abyss-core
+    command: ["composer", "install"] # Run Composer to install dependencies
+    networks:
+      - abyss-network
+
+  # Tailwind CSS Service
+  tailwind:
+    build: .
+    container_name: tailwind_container
+    volumes:
+      - /home/antonio/code/abyss-core:/home/antonio/code/abyss-core
+    working_dir: /home/antonio/code/abyss-core
+    command:
+      [
+        "./tailwindcss",
+        "-i",
+        "./app/resources/css/main.css",
+        "-o",
+        "./public/css/main.css",
+        "--watch",
+      ]
+    networks:
+      - abyss-network
+    depends_on:
+      - abyss-app
+
+volumes:
+  mysql_data:
+
+networks:
+  abyss-network:
+    driver: bridge
