@@ -1,71 +1,17 @@
 <?php
 
-// /**
-//  * Error handler, passes flow over the exception logger with new ErrorException.
-//  */
-// function log_error($num, $str, $file, $line, $context = null)
-// {
-//     log_exception(new ErrorException($str, 0, $num, $file, $line));
-// }
-
-// /**
-//  * Uncaught exception handler.
-//  */
-// function log_exception($e)
-// {
-//     if (true) {
-//         print "<div style='text-align: center;'>";
-//         print "<h2 style='color: rgb(190, 50, 50);'>Exception Occured:</h2>";
-//         print "<table style='width: 800px; display: inline-block;'>";
-//         print "<tr style='background-color:rgb(230,230,230);'><th style='width: 80px;'>Type</th><td>" .
-//             get_class($e) .
-//             "</td></tr>";
-//         print "<tr style='background-color:rgb(240,240,240);'><th>Message</th><td>{$e->getMessage()}</td></tr>";
-//         print "<tr style='background-color:rgb(230,230,230);'><th>File</th><td>{$e->getFile()}</td></tr>";
-//         print "<tr style='background-color:rgb(240,240,240);'><th>Line</th><td>{$e->getLine()}</td></tr>";
-//         print "</table></div>";
-//     } else {
-//         $message =
-//             "Type: " .
-//             get_class($e) .
-//             "; Message: {$e->getMessage()}; File: {$e->getFile()}; Line: {$e->getLine()};";
-//         file_put_contents(
-//             $config["app_dir"] . "/tmp/logs/exceptions.log",
-//             $message . PHP_EOL,
-//             FILE_APPEND
-//         );
-//         header("Location: {$config["error_page"]}");
-//     }
-
-//     exit();
-// }
-
-// /**
-//  * Checks for a fatal error, work around for set_error_handler not working on fatal errors.
-//  */
-// function check_for_fatal()
-// {
-//     $error = error_get_last();
-
-//     if ($error === null) {
-//         return;
-//     }
-
-//     if ($error["type"] == E_ERROR) {
-//         log_error(
-//             $error["type"],
-//             $error["message"],
-//             $error["file"],
-//             $error["line"]
-//         );
-//     }
-// }
-
-// register_shutdown_function("check_for_fatal");
-// set_error_handler("log_error");
-// set_exception_handler("log_exception");
-// ini_set("display_errors", "off");
-// error_reporting(E_ALL);
+/**
+ * This is a custom ErrorsHandler class to handle all of
+ * the errors that can occur in your application.
+ *
+ * It is set in app.php when initializin your application.
+ *
+ * Add later:
+ * - storing all errors to a custom log.txt files
+ * - errors handler
+ * - fix type definition for exception handler
+ *
+ **/
 
 namespace Abyss\Core;
 
@@ -73,41 +19,105 @@ use Abyss\Controller\Controller;
 
 final class ErrorsHandler
 {
-    public static function show_error_page($message, $file, $line)
-    {
+    /**
+     * Show custom error page
+     *
+     * @param mixed $message
+     * @param mixed $file
+     * @param mixed $line
+     * @param mixed $file_content
+     * @return void
+     */
+    public static function show_error_page(
+        $message,
+        $file,
+        $line,
+        $file_content
+    ): void {
         Controller::view(
             page: "error",
             props: [
                 "message" => $message,
                 "file" => $file,
                 "line" => $line,
+                "file_content" => $file_content,
             ]
         );
     }
-
-    public static function log_error()
+    /**
+     * Log all errors to the log file
+     *
+     * Add this later
+     *
+     * @return void
+     */
+    public static function log_error(): void
     {
     }
 
+    /**
+     * Handle all of php errors
+     *
+     * Currently doesn't work fix later
+     *
+     * @param mixed $num
+     * @param mixed $str
+     * @param mixed $file
+     * @param mixed $line
+     * @param mixed $context
+     * @return void
+     */
     public static function handle_error(
         $num,
         $str,
         $file,
         $line,
         $context = null
-    ) {
-        exit();
+    ): void {
     }
 
-    public static function handle_exception($exception)
+    /**
+     * Handle all of php exceptions
+     *
+     * There is a problem with setting a type, will fix later
+     *
+     * @param mixed $exception
+     * @return void
+     */
+    public static function handle_exception($exception): void
     {
-        var_dump($exception);
-        self::show_error_page();
+        // * Get file content in lines
+        $filename = $exception->getFile();
+        $lines = [];
 
-        exit();
+        $file_stream = fopen(filename: $filename, mode: "r");
+
+        if (!$file_stream) {
+            return;
+        }
+
+        while (!feof(stream: $file_stream)) {
+            $line = fgets(stream: $file_stream);
+
+            $lines[] = $line;
+        }
+
+        fclose(stream: $file_stream);
+
+        self::show_error_page(
+            message: $exception->getMessage(),
+            file: $exception->getFile(),
+            line: $exception->getLine(),
+            file_content: $lines
+        );
     }
 
-    public static function check_for_fatal_error()
+    /**
+     * Check for fatal error and handle it
+     *
+     * @return void
+     */
+    public static function check_for_fatal_error(): void
     {
         $error = error_get_last();
 
@@ -125,12 +135,21 @@ final class ErrorsHandler
         }
     }
 
-    public static function watch()
+    /**
+     * Set and register all of php error
+     * handlers to custom handlers
+     *
+     * @return void
+     */
+    public static function watch(): void
     {
         register_shutdown_function([self::class, "check_for_fatal_error"]);
+
         set_error_handler([self::class, "handle_error"]);
         set_exception_handler([self::class, "handle_exception"]);
+
         ini_set("display_errors", "off");
+
         error_reporting(E_ALL);
     }
 }
