@@ -1,5 +1,11 @@
 <?php
 
+/**
+ * Query builder class for creating custom queries
+ * without the need to write plain SQL
+ *
+ **/
+
 namespace Abyss\Outsider;
 
 use Error;
@@ -95,6 +101,13 @@ class QueryBuilder
     protected $hidden = [];
 
     /**
+     * Use this if you want to get hidden fields also
+     *
+     * @var bool
+     **/
+    protected $get_hidden_fields = false;
+
+    /**
      * All columns that are allowed to
      * be assigned a value to
      *
@@ -140,6 +153,28 @@ class QueryBuilder
         $this->fillable = $fillable;
 
         $this->connection = Outsider::get_connection();
+    }
+
+    /**
+     * Get hidden fields also
+     *
+     * @return QueryBuilder
+     **/
+    public function show_hidden(): QueryBuilder
+    {
+        $this->get_hidden_fields = true;
+
+        return $this;
+    }
+
+    /**
+     * Don't allow getting hidden fields
+     *
+     * @return void
+     **/
+    public function hide_hidden_fields(): void
+    {
+        $this->get_hidden_fields = false;
     }
 
     /**
@@ -540,7 +575,7 @@ class QueryBuilder
      **/
     public function find(): array
     {
-        return $this->limit(1)->find_many();
+        return $this->limit(1)->find_many()[0];
     }
 
     /**
@@ -598,13 +633,15 @@ class QueryBuilder
             $data = $this->get_relation_data($data);
         }
 
-        if (!empty($this->hidden)) {
+        if (!empty($this->hidden) && !$this->get_hidden_fields) {
             foreach ($data as $key => $row) {
                 foreach ($this->hidden as $hidden_column) {
                     unset($data[$key][$hidden_column]);
                 }
             }
         }
+
+        $this->hide_hidden_fields();
 
         return $data;
     }
@@ -613,9 +650,9 @@ class QueryBuilder
      * Create a new row
      *
      * @param array $data
-     * @return void
+     * @return array|Error
      **/
-    public function create(array $data): void
+    public function create(array $data): array|Error
     {
         $columns = [];
         $bindings = [];
@@ -640,6 +677,13 @@ class QueryBuilder
 
         try {
             $statement->execute($values);
+
+            // * After creation get and return data
+            $id = $this->connection->lastInsertId();
+
+            $data = $this->where($this->primary_key, "=", $id)->find();
+
+            return $data;
         } catch (Exception $error) {
             throw new Error($error);
         }

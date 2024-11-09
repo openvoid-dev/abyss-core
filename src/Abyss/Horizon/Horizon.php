@@ -81,11 +81,11 @@ class Horizon
      *
      * @param mixed $uri
      * @param Closure|array $action
-     * @return self
+     * @return void
      */
-    public static function post($uri, $action): self
+    public static function post($uri, $action): void
     {
-        return self::add("POST", $uri, $action);
+        self::add("POST", $uri, $action);
     }
 
     /**

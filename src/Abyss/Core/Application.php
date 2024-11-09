@@ -43,7 +43,7 @@ class Application
      * @param string $base_path
      * @return void
      */
-    public static function start(string $base_path) : void
+    public static function start(string $base_path): void
     {
         self::$base_path = $base_path;
 
@@ -56,10 +56,10 @@ class Application
      * @param array $config
      * @return void
      */
-    public static function configure(array $config) : void
+    public static function configure(array $config): void
     {
-        self::$name     = $config["name"];
-        self::$env      = $config["env"];
+        self::$name = $config["name"];
+        self::$env = $config["env"];
         self::$timezone = $config["timezone"];
     }
 
@@ -69,7 +69,7 @@ class Application
      * @param string $path
      * @return string
      */
-    public static function get_base_path(string $path) : string
+    public static function get_base_path(string $path): string
     {
         return self::$base_path . $path;
     }
@@ -79,7 +79,7 @@ class Application
      *
      * @return void
      */
-    private static function load_env() : void
+    private static function load_env(): void
     {
         $dotenv = Dotenv::createImmutable(self::$base_path);
 

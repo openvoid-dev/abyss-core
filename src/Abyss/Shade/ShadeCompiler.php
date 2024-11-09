@@ -2,6 +2,9 @@
 
 namespace Abyss\Shade;
 
+use Error;
+use Exception;
+
 class ShadeCompiler
 {
     /**
@@ -30,6 +33,7 @@ class ShadeCompiler
         );
 
         // * Handle basic directives (like @if, @endif)
+
         $template = preg_replace(
             "/@if\s*\((.+?)\)/",
             '<?php if ($1): ?>',
@@ -72,6 +76,4 @@ class ShadeCompiler
         // * Return plain vanilla php
         return $template;
     }
-
-    // protected static function
 }

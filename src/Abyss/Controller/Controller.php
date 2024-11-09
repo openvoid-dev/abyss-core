@@ -4,6 +4,7 @@ namespace Abyss\Controller;
 
 use Abyss\Core\Application;
 use Abyss\Shade\ShadeCompiler;
+use parallel\Events\Error;
 
 /**
  * Abstract class for every controller
@@ -34,5 +35,17 @@ abstract class Controller
 
         // Evaluate the compiled PHP code
         eval("?>" . $compiled);
+    }
+
+    /**
+     * Redirect to another page
+     *
+     * @param string $page
+     * @return void
+     **/
+    public static function redirect(string $page): void
+    {
+        header("Location: $page");
+        die();
     }
 }
