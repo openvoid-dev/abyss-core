@@ -86,6 +86,26 @@ final class Nebula
     }
 
     /**
+     * Check if user is logged in
+     *
+     * @return bool
+     **/
+    public static function is_user_logged_in(): bool
+    {
+        // * Check if user is set
+        if (!empty(self::$user)) {
+            return true;
+        }
+
+        // * Check for remember token
+        if (isset($_COOKIE["remember_token"])) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
      * Login user
      *
      * @param string $user_email
