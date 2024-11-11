@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * Simple controller-based router with dynamic route parameters
+ *
+ */
+
 namespace Abyss\Horizon;
 
 use Abyss\Core\Application;
@@ -8,9 +13,6 @@ use Abyss\Horizon\Middleware\Middleware;
 use Closure;
 use Exception;
 
-/**
- * Simple controller-based router with dynamic route parameters
- */
 class Horizon
 {
     /**

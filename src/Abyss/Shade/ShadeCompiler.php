@@ -1,5 +1,14 @@
 <?php
 
+/**
+ * Templating engine Shade
+ *
+ * It currently operates more like a string replace and
+ * search, but will later be created as a standalone
+ * templating language built with Go here:
+ * https://github.com/openvoid-dev/shade
+ */
+
 namespace Abyss\Shade;
 
 use Error;

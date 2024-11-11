@@ -1,10 +1,14 @@
 <?php
 
 /**
- * Custom Validator class Ward
+ * Custom Validator class Ward used for validating your data,
+ * mainly used for validating post request so you know
+ * exactly what you are getting from it.
  *
- *
- **/
+ * It was taken from https://github.com/openvoid-dev/php-validator
+ * and rebranded from 'PHP Validator' to 'Ward' and will later be
+ * added as a standalone package again under the name 'Ward'
+ */
 
 namespace Abyss\Ward;
 
