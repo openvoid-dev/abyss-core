@@ -575,7 +575,7 @@ class QueryBuilder
      **/
     public function find(): array
     {
-        return $this->limit(1)->find_many()[0];
+        return $this->limit(1)->find_many()[0] ?? [];
     }
 
     /**
