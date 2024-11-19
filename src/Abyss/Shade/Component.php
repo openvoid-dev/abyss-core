@@ -92,7 +92,7 @@ class Component
         // * Try to get all components (@component(*))
         if (
             !preg_match_all(
-                '/@component\(\s*["\'](.+?)["\']\s*\)/',
+                '/@component\(\s*["\'](.+?)["\'](?:\s*,\s*(\[.*?\]))?\s*\)/s',
                 $template,
                 $matches
             )
