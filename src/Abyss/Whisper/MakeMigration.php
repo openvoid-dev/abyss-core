@@ -93,7 +93,7 @@ class MakeMigration
         $migration_content =
             '<?php
 
-use Abyss\Outsider\Blueprint;
+use Abyss\Outsider\Blueprints\DatabaseBlueprint;
 use Abyss\Outsider\Migration;
 use Abyss\Outsider\Schema;
 
@@ -111,7 +111,7 @@ return new class extends Migration
     {
         Schema::create("' .
             $this->table_name .
-            '", function (Blueprint $table) {
+            '", function (DatabaseBlueprint $table) {
             $table->id();
             $table->timestamps();
         });

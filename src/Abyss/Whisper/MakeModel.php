@@ -98,7 +98,7 @@ use Abyss\Outsider\Model;
 
 class ' .
             $this->model_name .
-            ' extends Models
+            ' extends Model
 {
     /**
     * Uncomment this line if you are using
