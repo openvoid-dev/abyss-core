@@ -1,5 +1,11 @@
 <?php
 
+/**
+ * Custom ORM built for Abyss called Outsider, taking a
+ * similar approach to Laravel's Eloquent ORM.
+ *
+ */
+
 namespace Abyss\Outsider;
 
 use Abyss\Outsider\Blueprints\DatabaseBlueprint;
@@ -21,6 +27,11 @@ class Outsider
      */
     protected static $connection = null;
 
+    /**
+     * Database driver of a selected database
+     *
+     * @var null|DatabaseDriver
+     */
     public static $db_driver = null;
 
     /**
@@ -61,6 +72,12 @@ class Outsider
         return self::$connection;
     }
 
+    /**
+     * Create a SQLite connection
+     *
+     * @param array $sqlite_config
+     * @return void
+     */
     public static function connect_sqlite_driver(array $sqlite_config): void
     {
         // * DSN for SQLITE is just 'sqlite:/path/to/database.sqlite'''
@@ -77,6 +94,12 @@ class Outsider
         }
     }
 
+    /**
+     * Create a MySQL connection
+     *
+     * @param array $mysql_config
+     * @return void
+     */
     public static function connect_mysql_driver(array $mysql_config): void
     {
         $dsn = sprintf(
@@ -107,6 +130,11 @@ class Outsider
         }
     }
 
+    /**
+     * Get database driver based on selected database
+     *
+     * @return DatabaseDriver
+     */
     public static function get_db_driver(): DatabaseDriver
     {
         switch (self::$db_driver) {
@@ -119,6 +147,11 @@ class Outsider
         }
     }
 
+    /**
+     * Get database blueprint, based on database driver
+     *
+     * @return DatabaseBlueprint
+     */
     public static function get_db_blueprint(): DatabaseBlueprint
     {
         switch (self::$db_driver) {
