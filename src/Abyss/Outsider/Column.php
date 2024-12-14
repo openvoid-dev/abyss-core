@@ -51,21 +51,21 @@ class Column
      *
      * @var bool
      */
-    public $unique = false;
+    public bool $unique = false;
 
     /**
      * Is column a foreign key
      *
      * @var bool
      */
-    public $is_foreign_key = false;
+    public bool $is_foreign_key = false;
 
     /**
      * Foreign key table
      *
      * @var string|null
      */
-    public $foreign_key_table = null;
+    public ?string $foreign_key_table = null;
 
     /**
      * Construct new column
@@ -76,10 +76,10 @@ class Column
      * @param bool $is_primary
      */
     public function __construct(
-        $name,
-        $type,
-        $auto_increment,
-        $is_primary = false
+        string $name,
+        string $type,
+        bool $auto_increment,
+        bool $is_primary = false
     ) {
         $this->name = $name;
         $this->type = $type;
@@ -90,9 +90,9 @@ class Column
     /**
      * Set column to be nullable
      *
-     * @return static
+     * @return self
      */
-    public function nullable()
+    public function nullable(): self
     {
         $this->nullable = true;
 
@@ -103,9 +103,9 @@ class Column
      * Add default value for a column
      *
      * @param mixed $default_value
-     * @return static
+     * @return self
      */
-    public function default($default_value)
+    public function default(mixed $default_value): self
     {
         // Handle CURRENT_TIMESTAMP without quotes
         if (
@@ -131,9 +131,9 @@ class Column
     /**
      * Set column to unique
      *
-     * @return static
+     * @return self
      */
-    public function unique()
+    public function unique(): self
     {
         $this->unique = true;
 

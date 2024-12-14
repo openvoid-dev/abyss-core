@@ -26,17 +26,17 @@ final class Ward
     /**
      * @var array<string,array>
      */
-    private $validators;
+    private array $validators;
 
     /**
      * @var array<string,string>
      */
-    private $errors = [];
+    private array $errors = [];
 
     /**
      * @var array
      */
-    private $data = [];
+    private array $data = [];
 
     /**
      * @param array<int,mixed> $field_validators

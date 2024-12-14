@@ -21,7 +21,7 @@ class SQLiteBlueprint implements DatabaseBlueprint
      */
     public function id($column_name = "id"): Column
     {
-        $column = new Column($column_name, "INTEGER", true, true);
+        $column          = new Column($column_name, "INTEGER", true, true);
         $this->columns[] = $column;
 
         return $column;
@@ -53,7 +53,7 @@ class SQLiteBlueprint implements DatabaseBlueprint
      */
     public function string($column_name, $auto_increment = false): Column
     {
-        $column = new Column($column_name, "VARCHAR(255)", $auto_increment);
+        $column          = new Column($column_name, "VARCHAR(255)", $auto_increment);
         $this->columns[] = $column;
 
         return $column;
@@ -68,7 +68,7 @@ class SQLiteBlueprint implements DatabaseBlueprint
      */
     public function int($column_name, $auto_increment = false): Column
     {
-        $column = new Column($column_name, "INTEGER", $auto_increment);
+        $column          = new Column($column_name, "INTEGER", $auto_increment);
         $this->columns[] = $column;
 
         return $column;
@@ -76,7 +76,7 @@ class SQLiteBlueprint implements DatabaseBlueprint
 
     public function boolean($column_name): Column
     {
-        $column = new Column($column_name, "BOOL", false);
+        $column          = new Column($column_name, "BOOL", false);
         $this->columns[] = $column;
 
         return $column;
@@ -90,7 +90,7 @@ class SQLiteBlueprint implements DatabaseBlueprint
      */
     public function time($column_name): Column
     {
-        $column = new Column($column_name, "TIME", false);
+        $column          = new Column($column_name, "TIME", false);
         $this->columns[] = $column;
 
         return $column;
@@ -104,7 +104,7 @@ class SQLiteBlueprint implements DatabaseBlueprint
      */
     public function timestamp($column_name): Column
     {
-        $column = new Column($column_name, "TIMESTAMP", false);
+        $column          = new Column($column_name, "TIMESTAMP", false);
         $this->columns[] = $column;
 
         return $column;

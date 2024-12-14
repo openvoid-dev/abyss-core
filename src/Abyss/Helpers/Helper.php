@@ -15,7 +15,7 @@ class Helper
      * @param mixed $value
      * @return never
      */
-    public static function dd($value): never
+    public static function dd(mixed $value): never
     {
         echo "<pre>";
         var_dump($value);
@@ -55,7 +55,7 @@ class Helper
      * @return bool
      */
     public static function authorize(
-        $condition,
+        mixed $condition,
         $status = Response::FORBIDDEN
     ): bool {
         if (!$condition) {
