@@ -21,7 +21,7 @@ class ShadeCompiler
      *
      * @var null|string
      **/
-    protected static $layout;
+    protected static ?string $layout;
 
     /**
      * Compile Shade template to vanilla php

@@ -1,10 +1,10 @@
 <?php
 
 /**
- * This is a custom ErrorsHandler class to handle all of
+ * This is a custom ErrorsHandler class to handle all
  * the errors that can occur in your application.
  *
- * It is set in app.php when initializin your application.
+ * It is set in app.php when initializing your application.
  *
  * Add later:
  * - storing all errors to a custom log.txt files
@@ -33,17 +33,19 @@ final class ErrorsHandler
         $file,
         $line,
         $file_content
-    ): void {
+    ): void
+    {
         Controller::view(
             page: "error",
             props: [
-                "message" => $message,
-                "file" => $file,
-                "line" => $line,
+                "message"      => $message,
+                "file"         => $file,
+                "line"         => $line,
                 "file_content" => $file_content,
             ]
         );
     }
+
     /**
      * Log all errors to the log file
      *
@@ -73,7 +75,8 @@ final class ErrorsHandler
         $file,
         $line,
         $context = null
-    ): void {
+    ): void
+    {
     }
 
     /**
@@ -84,11 +87,11 @@ final class ErrorsHandler
      * @param mixed $exception
      * @return void
      */
-    public static function handle_exception($exception): void
+    public static function handle_exception(mixed $exception): void
     {
         // * Get file content in lines
         $filename = $exception->getFile();
-        $lines = [];
+        $lines    = [];
 
         $file_stream = fopen(filename: $filename, mode: "r");
 
@@ -148,7 +151,7 @@ final class ErrorsHandler
         set_error_handler([self::class, "handle_error"]);
         set_exception_handler([self::class, "handle_exception"]);
 
-        ini_set("display_errors", "off");
+        ini_set(option: "display_errors", value: "off");
 
         error_reporting(E_ALL);
     }

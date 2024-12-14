@@ -14,28 +14,28 @@ class Application
      *
      * @var string
      */
-    protected static $base_path;
+    protected static string $base_path;
 
     /**
      * The name of the project.
      *
      * @var string
      */
-    protected static $name;
+    protected static string $name;
 
     /**
      * Type of the application environment.
      *
      * @var string
      */
-    protected static $env;
+    protected static string $env;
 
     /**
      * Timezone of the application.
      *
      * @var string
      */
-    protected static $timezone;
+    protected static string $timezone;
 
     /**
      * Start the Abyss framework and load the env configuration

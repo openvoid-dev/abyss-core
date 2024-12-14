@@ -4,6 +4,7 @@ namespace Abyss\Controller;
 
 use Abyss\Core\Application;
 use Abyss\Shade\ShadeCompiler;
+use Exception;
 use parallel\Events\Error;
 
 /**
@@ -17,6 +18,7 @@ abstract class Controller
      * @param string $page
      * @param array $props
      * @return void
+     * @throws Exception
      */
     public static function view(string $page, array $props = []): void
     {
@@ -25,7 +27,7 @@ abstract class Controller
         );
 
         if (!file_exists($file_path)) {
-            throw new \Exception("View {$page} not found.");
+            throw new Exception("View $page not found.");
         }
 
         extract($props);

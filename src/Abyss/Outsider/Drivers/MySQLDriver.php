@@ -2,6 +2,6 @@
 
 namespace Abyss\Outsider\Drivers;
 
-class MySQLDriver extends DatabaseDriver
+class MySQLDriver implements DatabaseDriver
 {
 }

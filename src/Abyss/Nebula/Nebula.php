@@ -22,23 +22,23 @@ final class Nebula
     /**
      * User instance
      *
-     * @var array|bool
+     * @var array|bool|null
      **/
-    private static $user = null;
+    private static array|bool|null $user = null;
 
     /**
      * JWT secret set in Nebula config
      *
      * @var string
      **/
-    private static $jwt_secret;
+    private static string $jwt_secret;
 
     /**
      * Payload that is set in jwt token
      *
      * @var array
      **/
-    private static $payload;
+    private static array $payload;
 
     /**
      * Configure Nebula
@@ -185,9 +185,7 @@ final class Nebula
      */
     public static function hash_password(string $password): string
     {
-        $hashed_password = password_hash($password, PASSWORD_BCRYPT);
-
-        return $hashed_password;
+        return password_hash($password, PASSWORD_BCRYPT);
     }
 
     /**
@@ -197,9 +195,7 @@ final class Nebula
      **/
     private static function _generate_jwt_token(): string
     {
-        $jwt_token = JWT::encode(self::$payload, self::$jwt_secret, "HS256");
-
-        return $jwt_token;
+        return JWT::encode(self::$payload, self::$jwt_secret, "HS256");
     }
 
     /**
@@ -210,8 +206,6 @@ final class Nebula
      */
     private static function _authenticate_jwt_token(string $token): stdClass
     {
-        $decoded = JWT::decode($token, new Key(self::$jwt_secret, "HS256"));
-
-        return $decoded;
+        return JWT::decode($token, new Key(self::$jwt_secret, "HS256"));
     }
 }

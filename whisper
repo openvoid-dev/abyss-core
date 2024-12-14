@@ -5,13 +5,13 @@
 require __DIR__ . "/vendor/autoload.php";
 require __DIR__ . "/bootstrap/whisper.php";
 
-use Abyss\Whisper\Serve;
+use Abyss\Whisper\MakeController;
+use Abyss\Whisper\MakeFactory;
+use Abyss\Whisper\MakeMigration;
+use Abyss\Whisper\MakeModel;
 use Abyss\Whisper\MigrationRunner;
 use Abyss\Whisper\SeedDatabase;
-use Abyss\Whisper\MakeMigration;
-use Abyss\Whisper\MakeFactory;
-use Abyss\Whisper\MakeModel;
-use Abyss\Whisper\MakeController;
+use Abyss\Whisper\Serve;
 
 // Capture command-line arguments
 $command = $argv[1] ?? null;
@@ -19,28 +19,28 @@ $command = $argv[1] ?? null;
 switch ($command) {
     case "serve":
         // Start the Abyss server
-        (new Serve())->handle();
+        new Serve()->handle();
         break;
     case "migrate":
         // Call the migration runner
-        (new MigrationRunner())->run();
+        new MigrationRunner()->run();
         break;
     case "seed":
         // Call the migration runner
-        (new SeedDatabase())->run();
+        new SeedDatabase()->run();
         break;
     case "make:migration":
         // * Create a migration
-        (new MakeMigration($argv))->make();
+        new MakeMigration($argv)->make();
         break;
     case "make:factory":
-        (new MakeFactory($argv))->make();
+        new MakeFactory($argv)->make();
         break;
     case "make:model":
-        (new MakeModel($argv))->make();
+        new MakeModel($argv)->make();
         break;
     case "make:controller":
-        (new MakeController($argv))->make();
+        new MakeController($argv)->make();
         break;
     case "help":
         echo "Available commands are:\n";

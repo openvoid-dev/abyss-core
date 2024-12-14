@@ -2,6 +2,9 @@
 
 namespace Abyss\Outsider;
 
+use Closure;
+use Exception;
+
 class Schema
 {
     /**
@@ -10,8 +13,9 @@ class Schema
      * @param string $table
      * @param Closure $callback
      * @return void
+     * @throws Exception
      */
-    public static function create($table, $callback): void
+    public static function create(string $table, Closure $callback): void
     {
         // * Get correct driver and blueprint based on the used database
         $db_driver = Outsider::get_db_driver();
@@ -32,8 +36,9 @@ class Schema
      *
      * @param string $table
      * @return void
+     * @throws Exception
      */
-    public static function drop($table): void
+    public static function drop(string $table): void
     {
         // * Get correct db driver
         $db_driver = Outsider::get_db_driver();

@@ -9,32 +9,31 @@ namespace Abyss\Horizon;
 
 use Abyss\Core\Application;
 use Abyss\Horizon\Middleware\Middleware;
-
 use Closure;
 use Exception;
 
 class Horizon
 {
     /**
-     * All of the defined routes
+     * All the defined routes
      *
      * @var array
      */
-    protected static $routes = [];
+    protected static array $routes = [];
 
     /**
      * Start the router and listen for requests
      *
-     * @return void|Horizon
+     * @return void
      */
-    public static function start()
+    public static function start(): void
     {
         require Application::get_base_path("/app/routes/web.php");
 
         try {
             self::route();
-        } catch (Exception $err) {
-            return self::redirect(self::previousUrl());
+        } catch (Exception) {
+            self::redirect(self::previousUrl());
         }
     }
 
@@ -46,7 +45,7 @@ class Horizon
      * @param Closure|array $action
      * @return void
      */
-    public static function add($method, $uri, $action): void
+    public static function add(mixed $method, mixed $uri, Closure|array $action): void
     {
         // * Convert dynamic route placeholders {test_slug} to regex for matching
         $uri = preg_replace(
@@ -59,10 +58,10 @@ class Horizon
         $uri = rtrim($uri, "/") . "/?";
 
         self::$routes[] = [
-            "uri" => $uri,
-            "method" => $method,
+            "uri"        => $uri,
+            "method"     => $method,
             "middleware" => null,
-            "action" => $action,
+            "action"     => $action,
         ];
     }
 
@@ -73,7 +72,7 @@ class Horizon
      * @param Closure|array $action
      * @return void
      */
-    public static function get(string $uri, $action): void
+    public static function get(string $uri, Closure|array $action): void
     {
         self::add("GET", $uri, $action);
     }
@@ -85,7 +84,7 @@ class Horizon
      * @param Closure|array $action
      * @return void
      */
-    public static function post($uri, $action): void
+    public static function post(string $uri, Closure|array $action): void
     {
         self::add("POST", $uri, $action);
     }
@@ -95,11 +94,11 @@ class Horizon
      *
      * @param mixed $uri
      * @param Closure|array $action
-     * @return self
+     * @return void
      */
-    public static function delete($uri, $action): self
+    public static function delete(string $uri, Closure|array $action): void
     {
-        return self::add("DELETE", $uri, $action);
+        self::add("DELETE", $uri, $action);
     }
 
     /**
@@ -107,11 +106,11 @@ class Horizon
      *
      * @param mixed $uri
      * @param Closure|array $action
-     * @return self
+     * @return void
      */
-    public static function patch($uri, $action): self
+    public static function patch(string $uri, Closure|array $action): void
     {
-        return self::add("PATCH", $uri, $action);
+        self::add("PATCH", $uri, $action);
     }
 
     /**
@@ -119,11 +118,11 @@ class Horizon
      *
      * @param mixed $uri
      * @param Closure|array $action
-     * @return self
+     * @return void
      */
-    public static function put($uri, $action): self
+    public static function put(string $uri, Closure|array $action): void
     {
-        return self::add("PUT", $uri, $action);
+        self::add("PUT", $uri, $action);
     }
 
     /**
@@ -132,7 +131,7 @@ class Horizon
      * @param mixed $key
      * @return void
      */
-    public static function only($key): void
+    public static function only(mixed $key): void
     {
         self::$routes[array_key_last(self::$routes)]["middleware"] = $key;
     }
@@ -141,10 +140,11 @@ class Horizon
      * Handle the current request
      *
      * @return mixed
+     * @throws Exception
      */
-    public static function route()
+    public static function route(): mixed
     {
-        $uri = self::get_uri();
+        $uri    = self::get_uri();
         $method = self::get_method();
 
         foreach (self::$routes as $route) {
@@ -171,7 +171,7 @@ class Horizon
             // * Call closure and pass $params from the url
             echo $route["action"]($params);
 
-            return;
+            break;
         }
 
         self::abort();
@@ -195,7 +195,7 @@ class Horizon
      */
     public static function redirect(string $path): never
     {
-        header("location: {$path}");
+        header("location: $path");
         exit();
     }
 
@@ -209,7 +209,7 @@ class Horizon
     {
         http_response_code($code);
 
-        require Application::get_base_path("/app/views/{$code}.php");
+        require Application::get_base_path("/app/views/$code.php");
 
         die();
     }

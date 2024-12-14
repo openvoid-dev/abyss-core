@@ -26,71 +26,71 @@ class QueryBuilder
      *
      * @var string
      **/
-    protected $model;
+    protected string $model;
 
     /**
      * Table name
      *
      * @var string
      **/
-    protected $table;
+    protected string $table;
 
     /**
-     * All of the queries where clauses
+     * All the queries where clauses
      *
      * @var array
      **/
-    protected $wheres = [];
+    protected array $wheres = [];
 
     /**
      * What to select from db, default is all (*)
      *
      * @var array
      **/
-    protected $selects = [];
+    protected array $selects = [];
 
     /**
      * Join statement
      *
      * @var string|null
      **/
-    protected $join_stmt = null;
+    protected ?string $join_stmt = null;
 
     /**
      * Value that represents the limit to how
      * many rows a query should get
      *
-     * @var int
+     * @var int|null
      **/
-    protected $limit;
+    protected ?int $limit = null;
 
     /**
      * Value that represents the offset
      *
      * @var int
      **/
-    protected $offset;
+    protected int $offset = 0;
 
     /**
      * Value that represents the order by
      *
-     * @var string
+     * @var null|string
      **/
-    protected $order_by;
+    protected ?string $order_by = null;
 
     /**
      * Value that represents the group by
      *
-     * @var string
+     * @var string|null
      **/
-    protected $group_by;
+    protected ?string $group_by = null;
 
     /**
-     * All of the bindings to set in execute function
+     * All the bindings to set in execute function
      *
      * @var array
      **/
-    protected $bindings = [];
+    protected array $bindings = [];
 
     /**
      * Columns that should never be sent
@@ -98,14 +98,14 @@ class QueryBuilder
      *
      * @var array
      **/
-    protected $hidden = [];
+    protected array $hidden = [];
 
     /**
      * Use this if you want to get hidden fields also
      *
      * @var bool
      **/
-    protected $get_hidden_fields = false;
+    protected bool $get_hidden_fields = false;
 
     /**
      * All columns that are allowed to
@@ -113,21 +113,21 @@ class QueryBuilder
      *
      * @var array
      **/
-    protected $fillable = [];
+    protected array $fillable = [];
 
     /**
      * Name of the primary key
      *
      * @var string
      **/
-    protected $primary_key = "id";
+    protected string $primary_key = "id";
 
     /**
-     * All of the models relations
+     * All the models relations
      *
      * @var array
      **/
-    protected $relations = [];
+    protected array $relations = [];
 
     /**
      * Construct a new query class
@@ -142,15 +142,16 @@ class QueryBuilder
     public function __construct(
         string $model,
         string $table,
-        array $hidden,
+        array  $hidden,
         string $primary_key,
-        array $fillable
-    ) {
-        $this->model = $model;
-        $this->table = $table;
-        $this->hidden = $hidden;
+        array  $fillable
+    )
+    {
+        $this->model       = $model;
+        $this->table       = $table;
+        $this->hidden      = $hidden;
         $this->primary_key = $primary_key;
-        $this->fillable = $fillable;
+        $this->fillable    = $fillable;
 
         $this->connection = Outsider::get_connection();
     }
@@ -189,19 +190,19 @@ class QueryBuilder
             throw new Error("No value defined...");
         }
 
-        $column = $params[0];
+        $column   = $params[0];
         $operator = "=";
-        $value = $params[1];
+        $value    = $params[1];
 
         // * If there are only 2 params treat $operator as '='
         if (count($params) > 2) {
             $operator = $params[1];
-            $value = $params[2];
+            $value    = $params[2];
         }
 
-        $this->wheres[] = [
+        $this->wheres[]   = [
             "statement" => "$column $operator ?",
-            "type" => "default",
+            "type"      => "default",
         ];
         $this->bindings[] = $value;
 
@@ -221,18 +222,18 @@ class QueryBuilder
         }
 
         // * If there are only 2 params treat $operator as '='
-        $column = $params[0];
+        $column   = $params[0];
         $operator = "=";
-        $value = $params[1];
+        $value    = $params[1];
 
         if (count($params) > 2) {
             $operator = $params[1];
-            $value = $params[2];
+            $value    = $params[2];
         }
 
-        $this->wheres[] = [
+        $this->wheres[]   = [
             "statement" => "$column $operator ?",
-            "type" => "or",
+            "type"      => "or",
         ];
         $this->bindings[] = $value;
 
@@ -246,11 +247,11 @@ class QueryBuilder
      * @param array $values
      * @return QueryBuilder
      **/
-    public function where_between($column, $values): QueryBuilder
+    public function where_between(string $column, array $values): QueryBuilder
     {
-        $this->wheres[] = [
+        $this->wheres[]   = [
             "statement" => "$column BETWEEN ? AND ?",
-            "type" => "default",
+            "type"      => "default",
         ];
         $this->bindings[] = $values[0];
         $this->bindings[] = $values[1];
@@ -266,11 +267,11 @@ class QueryBuilder
      * @param array $values
      * @return QueryBuilder
      **/
-    public function where_outside($column, $values): QueryBuilder
+    public function where_outside(string $column, array $values): QueryBuilder
     {
-        $this->wheres[] = [
+        $this->wheres[]   = [
             "statement" => "$column NOT BETWEEN ? AND ?",
-            "type" => "default",
+            "type"      => "default",
         ];
         $this->bindings[] = $values[0];
         $this->bindings[] = $values[1];
@@ -286,13 +287,13 @@ class QueryBuilder
      * @param array $values
      * @return QueryBuilder
      **/
-    public function where_in($column, $values): QueryBuilder
+    public function where_in(string $column, array $values): QueryBuilder
     {
         $placeholders = implode(",", array_fill(0, count($values), "?"));
 
         $this->wheres[] = [
             "statement" => "$column IN ($placeholders)",
-            "type" => "default",
+            "type"      => "default",
         ];
         array_push($this->bindings, ...$values);
 
@@ -307,13 +308,13 @@ class QueryBuilder
      * @param array $values
      * @return QueryBuilder
      **/
-    public function where_not_in($column, $values): QueryBuilder
+    public function where_not_in(string $column, array $values): QueryBuilder
     {
         $placeholders = implode(",", array_fill(0, count($values), "?"));
 
         $this->wheres[] = [
             "statement" => "$column NOT IN ($placeholders)",
-            "type" => "default",
+            "type"      => "default",
         ];
         array_push($this->bindings, ...$values);
 
@@ -326,11 +327,11 @@ class QueryBuilder
      * @param string $column
      * @return QueryBuilder
      **/
-    public function where_null($column): QueryBuilder
+    public function where_null(string $column): QueryBuilder
     {
         $this->wheres[] = [
             "statement" => "$column IS NULL",
-            "type" => "default",
+            "type"      => "default",
         ];
 
         return $this;
@@ -342,11 +343,11 @@ class QueryBuilder
      * @param string $column
      * @return QueryBuilder
      **/
-    public function where_not_null($column): QueryBuilder
+    public function where_not_null(string $column): QueryBuilder
     {
         $this->wheres[] = [
             "statement" => "$column IS NOT NULL",
-            "type" => "default",
+            "type"      => "default",
         ];
 
         return $this;
@@ -373,9 +374,9 @@ class QueryBuilder
     /**
      * Set select values
      *
-     * @param string $column
+     * @param string ...$column
      * @return QueryBuilder
-     **/
+     */
     public function select(string ...$column): QueryBuilder
     {
         $this->selects = $column;
@@ -393,11 +394,12 @@ class QueryBuilder
      * @return QueryBuilder
      **/
     public function join(
-        $table_to_join,
-        $main_table_column_name,
-        $operator,
-        $table_to_join_column_name
-    ): QueryBuilder {
+        string $table_to_join,
+        string $main_table_column_name,
+        string $operator,
+        string $table_to_join_column_name
+    ): QueryBuilder
+    {
         $this->join_stmt = "INNER JOIN $table_to_join ON $main_table_column_name $operator $table_to_join_column_name";
 
         return $this;
@@ -413,11 +415,12 @@ class QueryBuilder
      * @return QueryBuilder
      **/
     public function left_join(
-        $table_to_join,
-        $main_table_column_name,
-        $operator,
-        $table_to_join_column_name
-    ): QueryBuilder {
+        string $table_to_join,
+        string $main_table_column_name,
+        string $operator,
+        string $table_to_join_column_name
+    ): QueryBuilder
+    {
         $this->join_stmt = "LEFT JOIN $table_to_join ON $main_table_column_name $operator $table_to_join_column_name";
 
         return $this;
@@ -433,11 +436,12 @@ class QueryBuilder
      * @return QueryBuilder
      **/
     public function right_join(
-        $table_to_join,
-        $main_table_column_name,
-        $operator,
-        $table_to_join_column_name
-    ): QueryBuilder {
+        string $table_to_join,
+        string $main_table_column_name,
+        string $operator,
+        string $table_to_join_column_name
+    ): QueryBuilder
+    {
         $this->join_stmt = "RIGHT JOIN $table_to_join ON $main_table_column_name $operator $table_to_join_column_name";
 
         return $this;
@@ -449,7 +453,7 @@ class QueryBuilder
      * @param string $function_name
      * @return QueryBuilder
      **/
-    public function with($function_name): QueryBuilder
+    public function with(string $function_name): QueryBuilder
     {
         $this->relations[] = $function_name;
 
@@ -471,7 +475,7 @@ class QueryBuilder
     /**
      * Set offset
      *
-     * @param int $$offset
+     * @param int $offset
      * @return QueryBuilder
      **/
     public function offset(int $offset): QueryBuilder
@@ -487,7 +491,7 @@ class QueryBuilder
      * @param string $value
      * @return QueryBuilder
      **/
-    public function order_by($column, $value): QueryBuilder
+    public function order_by(string $column, string $value): QueryBuilder
     {
         $this->order_by = "ORDER BY $column $value";
 
@@ -500,7 +504,7 @@ class QueryBuilder
      * @param string $column
      * @return QueryBuilder
      **/
-    public function group_by($column): QueryBuilder
+    public function group_by(string $column): QueryBuilder
     {
         $this->group_by = "GROUP BY $column";
 
@@ -523,8 +527,6 @@ class QueryBuilder
                 throw new Error(
                     "Relation $relation on model $this->model doesn't exist!"
                 );
-
-                continue;
             }
 
             // * Get relation data
@@ -552,9 +554,7 @@ class QueryBuilder
                     as $relation_data_key => $relation_data_row
                 ) {
                     if (
-                        $relation_data_row[
-                            $relation_specification["foreign_key"]
-                        ] !== $data_row[$relation_specification["foreign_key"]]
+                        $relation_data_row[$relation_specification["foreign_key"]] !== $data_row[$relation_specification["foreign_key"]]
                     ) {
                         continue;
                     }
@@ -585,17 +585,17 @@ class QueryBuilder
      **/
     public function find_many(): array
     {
-        $query = "SELECT * FROM {$this->table}";
+        $query = "SELECT * FROM $this->table";
 
         if (!empty($this->selects)) {
             $selects = implode(", ", $this->selects);
 
-            $query = "SELECT $selects FROM {$this->table}";
+            $query = "SELECT $selects FROM $this->table";
         }
 
         // * Joins
         if (!empty($this->join_stmt)) {
-            $query .= " {$this->join_stmt}";
+            $query .= " $this->join_stmt";
         }
 
         if (!empty($this->wheres)) {
@@ -603,19 +603,19 @@ class QueryBuilder
         }
 
         if ($this->limit) {
-            $query .= " LIMIT {$this->limit}";
+            $query .= " LIMIT $this->limit";
         }
 
         if ($this->offset) {
-            $query .= " OFFSET {$this->offset}";
+            $query .= " OFFSET $this->offset";
         }
 
         if ($this->order_by) {
-            $query .= " {$this->order_by}";
+            $query .= " $this->order_by";
         }
 
         if ($this->group_by) {
-            $query .= " {$this->group_by}";
+            $query .= " $this->group_by";
         }
 
         $statement = $this->connection->prepare($query);
@@ -654,25 +654,25 @@ class QueryBuilder
      **/
     public function create(array $data): array|Error
     {
-        $columns = [];
+        $columns  = [];
         $bindings = [];
-        $values = [];
+        $values   = [];
 
         foreach ($data as $key => $row) {
             if (!in_array($key, $this->fillable)) {
                 continue;
             }
 
-            $columns[] = $key;
-            $bindings[] = ":$key";
+            $columns[]       = $key;
+            $bindings[]      = ":$key";
             $values[":$key"] = $row;
         }
 
-        $columns_string = implode(", ", $columns);
+        $columns_string  = implode(", ", $columns);
         $bindings_string = implode(", ", $bindings);
 
         $statement = $this->connection->prepare(
-            "INSERT INTO {$this->table} ($columns_string) VALUES ($bindings_string)"
+            "INSERT INTO $this->table ($columns_string) VALUES ($bindings_string)"
         );
 
         try {
@@ -681,9 +681,7 @@ class QueryBuilder
             // * After creation get and return data
             $id = $this->connection->lastInsertId();
 
-            $data = $this->where($this->primary_key, "=", $id)->find();
-
-            return $data;
+            return $this->where($this->primary_key, "=", $id)->find();
         } catch (Exception $error) {
             throw new Error($error);
         }
@@ -723,17 +721,17 @@ class QueryBuilder
     public function update_many(array $data): void
     {
         $set_clause = implode(" = ?, ", array_keys($data)) . " = ?";
-        $values = array_values($data);
-        $values = array_merge($values, $this->bindings);
+        $values     = array_values($data);
+        $values     = array_merge($values, $this->bindings);
 
-        $query = "UPDATE {$this->table} SET $set_clause";
+        $query = "UPDATE $this->table SET $set_clause";
 
         if (!empty($this->wheres)) {
             $query .= $this->add_wheres_to_query();
         }
 
         if ($this->limit) {
-            $query .= " LIMIT {$this->limit}";
+            $query .= " LIMIT $this->limit";
         }
 
         $statement = $this->connection->prepare($query);
@@ -766,11 +764,11 @@ class QueryBuilder
             throw new Error("No where clause added");
         }
 
-        $query = "DELETE FROM {$this->table} ";
+        $query = "DELETE FROM $this->table ";
         $query .= $this->add_wheres_to_query();
 
         if ($this->limit) {
-            $query .= " LIMIT {$this->limit}";
+            $query .= " LIMIT $this->limit";
         }
 
         $statement = $this->connection->prepare($query);
@@ -819,16 +817,16 @@ class QueryBuilder
      **/
     public function show_select_statement(): array
     {
-        $query = "SELECT * FROM {$this->table}";
+        $query = "SELECT * FROM $this->table";
 
         if (!empty($this->selects)) {
             $selects = implode(", ", $this->selects);
 
-            $query = "SELECT $selects FROM {$this->table}";
+            $query = "SELECT $selects FROM $this->table";
         }
 
         if (!empty($this->join_stmt)) {
-            $query .= " {$this->join_stmt}";
+            $query .= " $this->join_stmt";
         }
 
         if (!empty($this->wheres)) {
@@ -836,38 +834,39 @@ class QueryBuilder
         }
 
         if ($this->limit) {
-            $query .= " LIMIT {$this->limit}";
+            $query .= " LIMIT $this->limit";
         }
 
         if ($this->offset) {
-            $query .= " OFFSET {$this->offset}";
+            $query .= " OFFSET $this->offset";
         }
 
         if ($this->order_by) {
-            $query .= " {$this->order_by}";
+            $query .= " $this->order_by";
         }
 
         if ($this->group_by) {
-            $query .= " {$this->group_by}";
+            $query .= " $this->group_by";
         }
 
         $statement = $this->connection->prepare($query);
 
         return [
             "statement" => $statement,
-            "bindings" => $this->bindings,
+            "bindings"  => $this->bindings,
         ];
     }
 
     /**
      * Get last created row
      *
+     * TODO: do this later
      * @return array
      **/
-    public function last(): array
-    {
-        $last_inserted_id = $this->connection->lastInsertId($this->primary_key);
-
-        return $this->find($last_inserted_id);
-    }
+//    public function last(): array
+//    {
+//        $last_inserted_id = $this->connection->lastInsertId($this->primary_key);
+//
+//        return $this->find();
+//    }
 }

@@ -2,7 +2,7 @@
 
 /**
  * Custom ORM built for Abyss called Outsider, taking a
- * similar approach to Laravel's Eloquent ORM.
+ * similar approach to Laravel Eloquent ORM.
  *
  */
 
@@ -25,25 +25,26 @@ class Outsider
      *
      * @var null|PDO
      */
-    protected static $connection = null;
+    protected static ?PDO $connection = null;
 
     /**
      * Database driver of a selected database
      *
-     * @var null|DatabaseDriver
+     * @var string|null
      */
-    public static $db_driver = null;
+    public static ?string $db_driver = null;
 
     /**
      * Connect to the database with the provided config
      *
      * @param array $config
      * @return void
+     * @throws Exception
      */
     public static function connect(array $config): void
     {
         // * Get DB driver
-        self::$db_driver = $config["default"];
+        self::$db_driver  = $config["default"];
         $db_driver_config = $config["connections"][self::$db_driver];
 
         switch (self::$db_driver) {
@@ -134,33 +135,29 @@ class Outsider
      * Get database driver based on selected database
      *
      * @return DatabaseDriver
+     * @throws Exception
      */
     public static function get_db_driver(): DatabaseDriver
     {
-        switch (self::$db_driver) {
-            case "sqlite":
-                return new SQLiteDriver();
-                break;
-            case "mysql":
-                return new MySQLDriver();
-                break;
-        }
+        return match (self::$db_driver) {
+            "sqlite" => new SQLiteDriver(),
+            "mysql" => new MySQLDriver(),
+            default => throw new Exception("Unsupported database driver."),
+        };
     }
 
     /**
      * Get database blueprint, based on database driver
      *
      * @return DatabaseBlueprint
+     * @throws Exception
      */
     public static function get_db_blueprint(): DatabaseBlueprint
     {
-        switch (self::$db_driver) {
-            case "sqlite":
-                return new SQLiteBlueprint();
-                break;
-            case "mysql":
-                return new MySQLBlueprint();
-                break;
-        }
+        return match (self::$db_driver) {
+            "sqlite" => new SQLiteBlueprint(),
+            "mysql" => new MySQLBlueprint(),
+            default => throw new Exception("Unsupported database driver."),
+        };
     }
 }

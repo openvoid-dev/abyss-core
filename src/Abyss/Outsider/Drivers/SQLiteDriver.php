@@ -3,10 +3,11 @@
 namespace Abyss\Outsider\Drivers;
 
 use Abyss\Outsider\Outsider;
+use PDO;
 
 class SQLiteDriver implements DatabaseDriver
 {
-    private $db = null;
+    private ?PDO $db = null;
 
     public function __construct()
     {
